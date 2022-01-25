@@ -1,0 +1,13 @@
+---
+title: "Import analysis"
+author: "Magnus Nygård Osnes"
+date: "1/25/2022"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+```
+
