@@ -1,13 +1,112 @@
 ---
-title: "Import analysis"
+title: "Import analysis and lineage growth analysis"
 author: "Magnus Nygård Osnes"
-date: "1/25/2022"
+date: "25 jan 2022"
 output: github_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+```
+
+
+```{r, include=FALSE}
+#Load required packages and local variables
+library(ape)
+library(LineageHomology)
+library(skygrowth)
+library(grid)
+library(scales) #Make more axis ticks.
+library(gridExtra)
+library(ggplot2)
+library(phylodyn)
+library(pbapply)
+
+#Notes:
+#Time consuming sections are commented out. The results are saved and loaded on new runs instead of rerunning every time. 
+#Had to install an older version of RcppArmadillo to get the script running
+#"install.packages("https://cran.r-project.org/src/contrib/Archive/RcppArmadillo/RcppArmadillo_0.9.900.3.0.tar.gz", repos=NULL, type="source")"
+
+#Setup paths
+path_main = "~/Dropbox/10000_Lovers/Phylogeography"
+path_data = "~/Dropbox/10000_Lovers/01_LineageHomology/11_saved_data/"
+path_results = "~/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/"
+
+source("~/Dropbox/10000_Lovers/01_LineageHomology/sourcefunctions/environment_variables.R")
+```
+
+The input for this analysis is the results from the maximum likelihood geographical state mapping on the full phylogenetic tree (obtained from iqtree 2). 
+
+```{r, include=FALSE}
+#Names of the norwegian sequences
+nor_tips = names(locations_NOR[which(locations_NOR=="Norway")])
+aus_tips = names(locations_NOR[which(locations_AUS=="Australia")])
+usa_tips = names(locations_NOR[which(locations_USA=="A_USA")])
+
+#Replicate transmission lineage (TL) counts.
+# replicates_NOR = pbreplicate(
+#   5,
+#   LineageHomology::LineageHomology_w_uncertainty_v2(
+#     tree=tree,
+#     ace_nodes=ace_NOR$lik.anc,
+#     ace_tips = to.matrix(locations_NOR, seq=c("Norway", "RoW")),
+#     start_time = 1750,give_tips = nor_tips
+#   )
+# )
+
+#Australia
+# replicates_AUS = pbreplicate(
+#   5,
+#   LineageHomology::LineageHomology_w_uncertainty_v2(
+#     tree=tree,
+#     ace_nodes=ace_AUS$lik.anc,
+#     ace_tips = to.matrix(locations_AUS, seq=c("Australia", "RoW")),
+#     start_time = 1750,give_tips = aus_tips
+#   )
+# )
+
+#USA
+# replicates_USA = pbreplicate(
+#   5,
+#   LineageHomology::LineageHomology_w_uncertainty_v2(
+#     tree=tree,
+#     ace_nodes=ace_USA$lik.anc,
+#     ace_tips = to.matrix(locations_USA, seq=c("A_USA", "RoW")),
+#     start_time = 1750,give_tips = usa_tips
+#   )
+# )
+#save(replicates_NOR, file=paste0(path_results,"replicates_NOR.Rdata"))
+#save(replicates_AUS, file=paste0(path_results,"replicates_AUS.Rdata"))
+#save(replicates_USA, file=paste0(path_results,"replicates_USA.Rdata"))
+load(file=paste0(path_results,"replicates_NOR.Rdata"))
+load(file=paste0(path_results,"replicates_AUS.Rdata"))
+load(file=paste0(path_results,"replicates_USA.Rdata"))
+```
+
+```{r, include=TRUE}
+LineageHomology::Summarize_import_local_transmission(replicates_NOR)
+LineageHomology::Summarize_import_local_transmission(replicates_AUS)
+LineageHomology::Summarize_import_local_transmission(replicates_USA)
 
 ```
+
+
+
+```{r, include=TRUE, warning=FALSE}
+name_date_NOR = name_date[name_date$name%in%nor_tips,]
+linfo_NOR = lineage_info(Result_NOR,name_date = name_date_NOR)
+LineageHomology::lineage_growth_cumulative(linfo_NOR,datelims=c("2015-01-01","2019-06-15","1 year"))
+
+
+name_date_AUS = name_date[name_date$name%in%aus_tips,]
+linfo_AUS = lineage_info(Result_AUS,name_date = name_date_AUS)
+LineageHomology::lineage_growth_cumulative(linfo_AUS,datelims=c("2016-07-01","2018-06-15","5 months"))
+
+name_date_USA = name_date[name_date$name%in%usa_tips,]
+linfo_USA = lineage_info(Result_USA,name_date = name_date_USA)
+LineageHomology::lineage_growth_cumulative(linfo_USA,datelims=c("2009-07-01","2017-06-15","1 year"))
+
+```
+
 
