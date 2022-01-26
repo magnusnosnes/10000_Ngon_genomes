@@ -7,6 +7,17 @@ The input for this analysis is the results from the maximum likelihood
 geographical state mapping on the full phylogenetic tree (obtained from
 iqtree 2).
 
+From the mapped geographical lineage distributions we can derive the
+number of importation and local transmission events for each location
+(based on the available sequences). NB. we do not account for unobserved
+infections (sequences), and hence the estimated number only reflects the
+fraction of *sequenced* genomes that is assigned to specific lineages.
+The relative growth between the lineages (growth of an transmission
+lineage implies local transmission), is an important quantity and tells
+us how dominant specific lineages have become over time. This too could
+be affected by nonrandom sampling such as targeted sampling of lineages
+with anitibiotic resistance.
+
 ``` r
 LineageHomology::Summarize_import_local_transmission(replicates_NOR)
 ```
