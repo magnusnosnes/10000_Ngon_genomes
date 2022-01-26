@@ -53,7 +53,7 @@ LineageHomology::lineage_growth_cumulative(linfo_AUS,datelims=c("2016-07-01","20
 ``` r
 name_date_USA = name_date[name_date$name%in%usa_tips,]
 linfo_USA = lineage_info(Result_USA,name_date = name_date_USA)
-LineageHomology::lineage_growth_cumulative(linfo_USA,datelims=c("2009-07-01","2017-06-15","1 year"))
+LineageHomology::lineage_growth_cumulative(linfo_USA,datelims=c("2009-07-01","2019-06-15","1 year"))
 ```
 
 ![](03_import_analysis_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
