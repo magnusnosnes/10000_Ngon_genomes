@@ -4,8 +4,7 @@ Magnus Nygård Osnes
 25 jan 2022
 
 The input for this analysis is the results from the maximum likelihood
-geographical state mapping on the full phylogenetic tree (obtained from
-iqtree 2).
+geographical state mapping on the full phylogenetic tree.
 
 From the mapped geographical lineage distributions we can derive the
 number of importation and local transmission events for each location
@@ -45,6 +44,14 @@ LineageHomology::Summarize_import_local_transmission(replicates_USA)
     ## Local transmission 2057.5000000 2066.0000000 2068.8000000
     ## Import / Total        0.1278246    0.1290051    0.1325885
 
+In Norway we estimate that there is 29% importation. This is more than
+twice the estimated amount in USA and Australia (each ca. 13%)
+
+## Cumulative growth of transmission lineages
+
+The following plots show the cumulative number of sequences obtained
+from each estimated transmission lineage over time
+
 ``` r
 name_date_NOR = name_date[name_date$name%in%nor_tips,]
 linfo_NOR = lineage_info(Result_NOR,name_date = name_date_NOR)
@@ -64,7 +71,15 @@ LineageHomology::lineage_growth_cumulative(linfo_AUS,datelims=c("2016-07-01","20
 ``` r
 name_date_USA = name_date[name_date$name%in%usa_tips,]
 linfo_USA = lineage_info(Result_USA,name_date = name_date_USA)
-LineageHomology::lineage_growth_cumulative(linfo_USA,datelims=c("2009-07-01","2019-06-15","1 year"))
+LineageHomology::lineage_growth_cumulative(linfo_USA,datelims=c("2008-07-01","2019-06-15","2 year"))
 ```
 
 ![](03_import_analysis_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
+
+## Import and local transmission over time
+
+![](03_import_analysis_files/figure-gfm/remedy003-1.png)<!-- -->
+
+![](03_import_analysis_files/figure-gfm/remedy004-1.png)<!-- -->
+
+![](03_import_analysis_files/figure-gfm/remedy005-1.png)<!-- -->

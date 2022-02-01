@@ -36,7 +36,7 @@ path_results = "~/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/"
 source("~/Dropbox/10000_Lovers/01_LineageHomology/sourcefunctions/environment_variables.R")
 ```
 
-The input for this analysis is the results from the maximum likelihood geographical state mapping on the full phylogenetic tree (obtained from iqtree 2). 
+The input for this analysis is the results from the maximum likelihood geographical state mapping on the full phylogenetic tree. 
 
 ```{r, include=FALSE}
 #Names of the norwegian sequences
@@ -94,7 +94,11 @@ LineageHomology::Summarize_import_local_transmission(replicates_USA)
 ```
 
 
+In Norway we estimate that there is 29% importation. This is more than twice the estimated amount in USA and Australia (each ca. 13%)
 
+## Cumulative growth of transmission lineages
+
+The following plots show the cumulative number of sequences obtained from each estimated transmission lineage over time
 ```{r, include=TRUE, warning=FALSE}
 name_date_NOR = name_date[name_date$name%in%nor_tips,]
 linfo_NOR = lineage_info(Result_NOR,name_date = name_date_NOR)
@@ -107,8 +111,55 @@ LineageHomology::lineage_growth_cumulative(linfo_AUS,datelims=c("2016-07-01","20
 
 name_date_USA = name_date[name_date$name%in%usa_tips,]
 linfo_USA = lineage_info(Result_USA,name_date = name_date_USA)
-LineageHomology::lineage_growth_cumulative(linfo_USA,datelims=c("2009-07-01","2019-06-15","1 year"))
+LineageHomology::lineage_growth_cumulative(linfo_USA,datelims=c("2008-07-01","2019-06-15","2 year"))
 
 ```
 
+
+## Import and local transmission over time
+
+```{r remedy001, echo=F, include=F}
+#Extract importation and local transmission on monthly basis
+# extract_indices = function(counts,time_interval=c("2000-05-01","2016-05-01")){
+#   clims = decimal_date(as.Date(time_interval))
+#   indselect=which(counts$Week_time>=clims[1]&counts$Week_time<=clims[2])
+#   counts$Import=counts$Import[indselect]
+#   counts$LC=counts$LC[indselect]
+#   counts$Week_time=counts$Week_time[indselect]
+# }
+
+source("~/Dropbox/Github/10000_Ngon_genomes/R/plot_import_local.R")
+
+
+```
+
+```{r remedy002, echo=F, include =F}
+# imploc_NOR = LineageHomology::import_local_transmission(tree,replicates_NOR,start_time=1750,time_interval_size = 1)
+# save(imploc_NOR, file=paste0(path_results,"imploc_NOR.Rdata"))
+load(file=paste0(path_results,"imploc_NOR.Rdata"))
+
+# imploc_AUS = LineageHomology::import_local_transmission(tree,replicates_AUS,start_time=1750,time_interval_size = 1)
+# save(imploc_AUS, file=paste0(path_results,"imploc_AUS.Rdata"))
+load(file=paste0(path_results,"imploc_AUS.Rdata"))
+
+# imploc_USA = LineageHomology::import_local_transmission(tree,replicates_USA,start_time=1750,time_interval_size = 1)
+# save(imploc_USA, file=paste0(path_results,"imploc_USA.Rdata"))
+load(file=paste0(path_results,"imploc_USA.Rdata"))
+
+```
+
+```{r remedy003, echo=F}
+plot_importation_local(tree = tree,result_import_local_transmission = imploc_NOR,start_time = 1750,date_breaks = "2 years",time_interval = c("2000-01-01","2018-01-01"))
+#dev.off()
+```
+
+```{r remedy004, echo=F}
+plot_importation_local(tree = tree,result_import_local_transmission = imploc_USA,start_time = 1750,date_breaks = "2 years",time_interval = c("2000-01-01","2018-01-01"))
+#dev.off()
+```
+
+```{r remedy005, echo=F}
+g1 = plot_importation_local(tree = tree,result_import_local_transmission = imploc_AUS,start_time = 1750,date_breaks = "2 years",time_interval = c("2000-01-01","2018-01-01"))
+#dev.off()
+```
 

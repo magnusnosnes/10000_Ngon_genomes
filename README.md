@@ -23,6 +23,6 @@ text).
 The estimated geographical distinct lineages ([transmission
 lineages](https://www.science.org/doi/10.1126/science.abf2946)
 
-![Test](Files/TL_Explorer.png)
+[![Test](Files/TL_Explorer.png)](https://magnunos.shinyapps.io/LineageHomology_Explorer/?_ga=2.205397328.1370338265.1637693506-226041197.1637248825)
 
 ### [Import and local transmission analyses](Analyses/03_import_analysis.md)
