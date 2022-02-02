@@ -1,5 +1,5 @@
 plot_importation_local = function(tree,result_import_local_transmission,start_time,
-                                               date_breaks="2 years",time_interval=c("2000-05-01","2016-05-01"))
+                                               date_breaks="2 years",time_interval=c("2000-05-01","2016-05-01"), main_title = "")
 {
   nrep= nrow(result_import_local_transmission$Import)
   time_end = start_time+max(nodeHeights(tree))
@@ -19,12 +19,12 @@ plot_importation_local = function(tree,result_import_local_transmission,start_ti
   colnames(dat)=c("i2.5","i50","i97.5","e2.5","e50","e97.5","dates")
   
   library(grid) #Requires the grid package for plotting
-    g1_1 = ggplot(dat, aes(x=dates,y=i50))+geom_line(col="Blue")+theme_minimal(base_size=20)+
+    g1_1 = ggplot(dat, aes(x=dates,y=i50))+geom_line(col="Blue")+theme_minimal(base_size=20)+ggtitle(main_title)+
       theme(axis.title.x = element_blank(), axis.text.x = element_blank())+
       geom_ribbon(aes(ymin=i2.5, ymax=i97.5,alpha=0.2), fill="blue")+
       scale_x_date(date_breaks=date_breaks,limits = as.Date(time_interval),labels=date_format("%d %b %Y"), expand=c(0,0))+
       ylab("Import")+
-      theme(legend.position = "none")
+      theme(legend.position = "none",plot.title = element_text(hjust = 0.5))
     #g1_1
     
     

@@ -149,17 +149,17 @@ load(file=paste0(path_results,"imploc_USA.Rdata"))
 ```
 
 ```{r remedy003, echo=F}
-plot_importation_local(tree = tree,result_import_local_transmission = imploc_NOR,start_time = 1750,date_breaks = "2 years",time_interval = c("2000-01-01","2018-01-01"))
+plot_importation_local(tree = tree,result_import_local_transmission = imploc_NOR,start_time = 1750,date_breaks = "2 years",time_interval = c("2000-01-01","2018-01-01"), main_title = "Norway")
 #dev.off()
 ```
 
 ```{r remedy004, echo=F}
-plot_importation_local(tree = tree,result_import_local_transmission = imploc_USA,start_time = 1750,date_breaks = "2 years",time_interval = c("2000-01-01","2018-01-01"))
+plot_importation_local(tree = tree,result_import_local_transmission = imploc_USA,start_time = 1750,date_breaks = "2 years",time_interval = c("2000-01-01","2018-01-01"), main_title = "USA")
 #dev.off()
 ```
 
 ```{r remedy005, echo=F}
-g1 = plot_importation_local(tree = tree,result_import_local_transmission = imploc_AUS,start_time = 1750,date_breaks = "2 years",time_interval = c("2000-01-01","2018-01-01"))
+g1 = plot_importation_local(tree = tree,result_import_local_transmission = imploc_AUS,start_time = 1750,date_breaks = "2 years",time_interval = c("2000-01-01","2018-01-01"), main_title = "Australia")
 #dev.off()
 ```
 
