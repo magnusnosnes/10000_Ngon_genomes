@@ -101,7 +101,7 @@ LineageHomology::Summarize_import_local_transmission(replicates_USA)
 ```
 
 
-In Norway we estimate that there is 29% importation. This is more than twice the estimated amount in USA and Australia (each ca. 13%)
+In Norway we estimate that there is 29% importation. This is more than twice the estimated amount in USA and Australia (each around 13%)
 
 ## Cumulative growth of transmission lineages
 

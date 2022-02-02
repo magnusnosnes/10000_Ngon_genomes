@@ -8,12 +8,12 @@ knit: (function(input_file, encoding) {
 
 
 
-## This repository describes the workflow and analyses of the 1000 genomes of *Neisseria gonorrhoeae*
+## This webpage describes the workflow and analyses of the 10000 genomes of *Neisseria gonorrhoeae*
 
-The aim of this project was investigate global transmission dynamics of Neisseria gonorrhoeae in the period 2015 - 2018. 
+The aim of this project investigate global transmission dynamics of Neisseria gonorrhoeae in the period 2015 - 2018. To do so we have collected a globally diverse sample 
 
 #### Data preparation
-Data preparation: Collection info, alignment, recombination masking, snp-calling are described in the paper (link to come). 
+Data preparation: Collection info, alignment, recombination masking, snp-calling are described in the paper (link will be posted). 
 
 ##### Phylogeny
 The phylogenetic tree was produced by using [FastTree v.2.1](https://doi.org/10.1371/journal.pone.0009490)
