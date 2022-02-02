@@ -38,6 +38,6 @@ The estimated geographical distinct lineages [transmission lineages](https://www
 
 ### [Import and local transmission analyses](Analyses/03_import_analysis.md)
 
-[![Test](Files/Import_local_transmission.png)](https://github.com/magnusnosnes/10000_Ngon_genomes/blob/main/Analyses/03_import_analysis.md)
+[![Test](Files/Import_local_transmission.png)](https://github.com/magnusnosnes/10000_Ngon_genomes/blob/main/Analyses/index.html)
 
 </center>
