@@ -18,7 +18,11 @@ genetic distance to time was done using
 constrained to date estimates derived in previous studies (see paper
 text).
 
+<center>
+
 ### [Transmission lineages and metadata exploration](https://magnunos.shinyapps.io/LineageHomology_Explorer/?_ga=2.205397328.1370338265.1637693506-226041197.1637248825)
+
+</center>
 
 The estimated geographical distinct lineages [transmission
 lineages](https://www.science.org/doi/10.1126/science.abf2946)
@@ -28,10 +32,9 @@ lineages](https://www.science.org/doi/10.1126/science.abf2946)
 [![](Files/TL_Explorer.png)](https://magnunos.shinyapps.io/LineageHomology_Explorer/?_ga=2.205397328.1370338265.1637693506-226041197.1637248825)
 
 </center>
+<center>
 
 ### [Import and local transmission analyses](Analyses/03_import_analysis.md)
-
-<center>
 
 [![Test](Files/Import_local_transmission.png)](https://github.com/magnusnosnes/10000_Ngon_genomes/blob/main/Analyses/03_import_analysis.md)
 
