@@ -6,9 +6,9 @@ knit: (function(input_file, encoding) {
  output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
 ---
 
-### This repository describes the workflow and analyses of the 1000 genomes of *Neisseria gonorrhoeae*
+## This repository describes the workflow and analyses of the 1000 genomes of *Neisseria gonorrhoeae*
 
-The aim of this project was investigate global transmission dynamics of Neisseria gorrhoeae in the period 2015 - 2018. 
+The aim of this project was investigate global transmission dynamics of Neisseria gonorrhoeae in the period 2015 - 2018. 
 
 #### Data preparation
 Data preparation: Collection info, alignment, recombination masking, snp-calling are described in the paper (link to come). 
@@ -39,5 +39,6 @@ The estimated geographical distinct lineages [transmission lineages](https://www
 ### [Import and local transmission analyses](Analyses/LineagesAndImport.html)
 
 [![Test](Files/Import_local_transmission.png)](Analyses/LineagesAndImport.html)
+
 
 </center>
