@@ -42,3 +42,12 @@ The estimated geographical distinct lineages [transmission lineages](https://www
 
 
 </center>
+
+<center>
+
+### [Growth rate of lineages and relation to metadata](Analyses/Growth_rates_explanatory.html)
+
+[![Test](Files/Metadata.png)](Analyses/Growth_rates_explanatory.html)
+
+
+</center>
