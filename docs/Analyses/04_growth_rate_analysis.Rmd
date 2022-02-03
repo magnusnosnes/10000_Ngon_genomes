@@ -293,7 +293,6 @@ str(total_data)
 
 ## Modeling the growth rates and lineage sizes on the metadata
 
-The growth rates and lineage size may are the two quantities we seek to explain
 
 ```{r, echo=FALSE, include = T}
 
@@ -302,8 +301,7 @@ g2 = ggplot(total_data)+theme_bw()+geom_point(aes(x=tlSize, y=GrowthRate,color=l
 g2
 ```
 
-
-Growth rate versus variables
+Here we investigate the growth rate and size of the transmission lineages, and the relation of these to the explanatory variables: penA, mtrD, sex distribution and location. 
 
 ```{r, echo=FALSE, include = T}
 g1 = ggplot(total_data)+theme_bw()+geom_point(aes(x=sexDistribution, y=GrowthRate))+ylab("Growth rate")
