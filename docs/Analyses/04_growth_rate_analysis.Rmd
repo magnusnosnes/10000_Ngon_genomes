@@ -344,7 +344,6 @@ summary(mod_lineage_size)
 
 mod_growthRate = lm(GrowthRate~penA+mtr+sexDistribution+locations, data = total_data)
 summary(mod_growthRate)
-plot(mod_growthRate)
 
 ```
 
