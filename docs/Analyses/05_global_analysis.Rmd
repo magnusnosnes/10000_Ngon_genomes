@@ -11,25 +11,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
-<html lang="en">
-  <style>
-    .bigh {
-      font-size: 63px;
-    }
-  </style>
-
-  <body>
-    <svg viewBox="0 0 500 500">
-    <path id="headline" fill="transparent" d="M50 50 l 400 0"/>
-    <!--path id="headline" fill="transparent" d="M80 100 A 180 60, 0, 0, 1, 420 100"/-->
-     <text width="500" text-anchor="middle" fill="red">
-     <textPath class="bigh" xlink:href="#headline" startOffset="50%" spacing = "auto">
-       Global Metadata Analysis
-     </text>
-    </svg>
-  </body>
-</html>
-
 
 ```{r, include=FALSE}
 #Load required packages and local variables
