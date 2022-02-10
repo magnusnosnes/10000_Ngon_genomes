@@ -159,7 +159,7 @@ metaDataTimeTree = data.frame("id"=tree$tip.label,
 #   Functional                                                              ####
 library(ggforce)
 library(ggnewscale)
-
+library(RColorBrewer)
 p = ggtree(tree)
 metdat <- p$data %>%
   dplyr::inner_join(metaDataTimeTree, c('label' = 'id')) #Matches the column of id and tree labels.
@@ -168,10 +168,11 @@ metdat$dummy_bar_value = as.numeric(rep(1, nrow(metdat)))
 df_bar = data.frame(id=tree$tip.label, dummy_bar_value=rep(1, length(tree$tip.label)))
 
 p1 = p %<+% metaDataTimeTree
+cols =  c(brewer.pal(12,"Paired")[-12],"#FFFFFF")
 
 p2 = p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col, 
                 aes(x = dummy_bar_value,
-                fill = mtrMosaic), orientation = 'y', width = 1)+theme_tree2(legend.position=c(.05, .85))+
+                fill = mtrMosaic), orientation = 'y', width = 1)+theme(legend.position="bottom")+labs(fill = "Metadata")+
   new_scale_color()+
   geom_facet(panel = "penA MIC category", data =df_bar, geom = geom_col, 
                 aes(x = dummy_bar_value, fill = penaMicCategory
@@ -183,12 +184,12 @@ p2 = p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col,
   new_scale_color()+
    geom_facet(panel = "Sex", data =df_bar, geom = geom_col,
                  aes(x = dummy_bar_value, fill = Sex
-                 ), orientation = 'y', width =1)
+                 ), orientation = 'y', width =1)+scale_fill_manual(breaks=c("non-mosaic","semi-mosaic","high","low","mosaic","mosaic1","mosaic2","mosaic3","mosaic4","F","M","nd"),values=cols)#scale_fill_brewer(palette="Paired")
 
 
 p3=  p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col, 
                 aes(x = dummy_bar_value,
-                fill = mtrMosaic), orientation = 'y', width = 1)+theme_tree2(legend.position=c(.05, .85))+
+                fill = mtrMosaic), orientation = 'y', width = 1)+theme(legend.position="bottom")+labs(fill = "Metadata")+
   geom_facet(panel = "penA MIC category", data =df_bar, geom = geom_col, 
                 aes(x = dummy_bar_value, fill = penaMicCategory
                 ), orientation = 'y', width = 1)+
@@ -197,11 +198,13 @@ p3=  p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col,
                  ), orientation = 'y', width = 1)+
    geom_facet(panel = "Sex", data =df_bar, geom = geom_col,
                  aes(x = dummy_bar_value, fill = Sex
-                 ), orientation = 'y', width = 1)
+                 ), orientation = 'y', width = 1)+scale_fill_manual(breaks=c("non-mosaic","semi-mosaic","high","low","mosaic","mosaic1","mosaic2","mosaic3","mosaic4","F","M","nd"),values=cols)#scale_fill_brewer(palette="Paired")
+
+
 
 ```
 
-### Tree anotation
+### Tree with metadata
 
 The fully annotated tree shows that most of the mosaic variant of mtr clusters in distict part of the tree. 
 High HIC categories also clusters in some sections of the tree. 
@@ -210,7 +213,7 @@ The sex distribution does not have major evident clusters when we look at the tr
 
 ```{r, include=T, echo=F,  warning=F,fig.height=15, fig.width=15}
 #Adjust the facet_widths. 
-p2 = facet_widths(p2, c(Tree=10))
+p2 = facet_widths(p2, c(Tree=12))
 p2
 ```
 
@@ -218,7 +221,10 @@ p2
 
 ```{r,  include=T, echo=F, warning=F, fig.height=10, fig.width=10}
 #Interactive plot
-ggplotly(p3) %>% partial_bundle()
+ggplotly(p3) %>% layout(legend=list(x=0, 
+                                 xanchor='left',
+                                 yanchor='bottom',
+                                 orientation='h'))    %>% partial_bundle()
 
 ```
 
