@@ -61,7 +61,6 @@ This analysis explores the relation of the growth rate of the transmission in th
 
 [![Test](Files/Global_analysis.png)](Analyses/global_analysis.html)
 
-
-This analysis explores the relation of the growth rate of the transmission in the period 2010-2017 and the final size of the transmission lineages, to the metadata of the sequences belonging to those TLs. We extract phylodynamic estimates of the growth rate, and use the lineage size estimated using LineageHomology and run regression analysis to explore the correlation of 
+This analysis does not define clades based on the concept of transmission lineages as above, but instead focuses on large clades defined by metadata such as genees: mtr mosaic and penA mosaic, MIC category (high or low), and sex distribution. We describe the effective population size dynamics in the large clades and relate this to the metadata. 
 
 </center>
