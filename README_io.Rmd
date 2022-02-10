@@ -28,7 +28,7 @@ Scaling of the genetic distance to time was done using [LSD2](https://doi.org/10
 
 
 
-[<img src="Files/TL_Explorer.png" width="400"/>](https://magnunos.shinyapps.io/LineageHomology_Explorer/?_ga=2.205397328.1370338265.1637693506-226041197.1637248825)
+[<img src="Files/TL_Explorer.png" width="500"/>](https://magnunos.shinyapps.io/LineageHomology_Explorer/?_ga=2.205397328.1370338265.1637693506-226041197.1637248825)
 
 
 
@@ -39,7 +39,7 @@ The R-shiny app above displays the estimated [transmission lineages](https://www
 ### [Import and local transmission analyses](Analyses/LineagesAndImport.html)
 
 
-[<img src="Files/Import_local_transmission.png" width="400"/>](Analyses/LineagesAndImport.html)
+[<img src="Files/Import_local_transmission.png" width="500"/>](Analyses/LineagesAndImport.html)
 
 This analysis provides estimates of the total number of importation and local transmission events in each location. Additinally we use the transmission lineages to derive importation and local transmission over time. 
 
@@ -49,7 +49,7 @@ This analysis provides estimates of the total number of importation and local tr
 
 ### [Growth rate of lineages and relation to metadata](Analyses/Growth_rates_explanatory.html)
 
-[<img src="Files/Metadata.png" width="400"/>](Analyses/Growth_rates_explanatory.html)
+[<img src="Files/Metadata.png" width="500"/>](Analyses/Growth_rates_explanatory.html)
 
 
 This analysis explores the relation of the growth rate of the transmission in the period 2010-2017 and the final size of the transmission lineages, to the metadata of the sequences belonging to those TLs. We extract phylodynamic estimates of the growth rate, and use the lineage size estimated using LineageHomology and run regression analysis to explore the correlation of 
@@ -64,7 +64,7 @@ This analysis explores the relation of the growth rate of the transmission in th
 
 
 
-[<img src="Files/Global_analysis.png" width="400"/>](Analyses/global_analysis.html)
+[<img src="Files/Global_analysis.png" width="500"/>](Analyses/global_analysis.html)
 
 This analysis does not define clades based on the concept of transmission lineages as above, but instead focuses on large clades defined by metadata such as genees: mtr mosaic and penA mosaic, MIC category (high or low), and sex distribution. We describe the effective population size dynamics in the large clades and relate this to the metadata. 
 
