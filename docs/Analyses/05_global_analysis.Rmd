@@ -65,9 +65,10 @@ plot(remainder_tree, show.tip.label = F)
 length(tree$tip.label); length(remainder_tree$tip.label); length(mtrSubtree$tip.label) 
 ```
 
-## For the global analysis we want to describe large clades that differ in some metadata with respect to the rest of the tree. 
+# Global metadata effective pupulation size analysis
 
-### First we look at the distribution of mosaic  variants of  the genes mtr and penA, minimum inhibitory concentration (MIC) (categorised into levels high and low) levels,  and  sex  distribution, 
+we want to describe large clades that differ in some metadata with respect to the rest of the tree. 
+First we look at the distribution of mosaic  variants of  the genes mtr and penA, minimum inhibitory concentration (MIC) (categorised into levels high and low) levels,  and  sex  distribution, 
 
 ```{r,include=F}
 #Define skygrowth with shifted time
@@ -200,9 +201,11 @@ p3=  p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col,
 
 ```
 
-### The fully annotated tree shows that most of the mosaic variant of mtr clusters in distict part of the tree. 
-### High HIC categories also clusters in some sections of the tree. 
-### The sex distribution does not have major evident clusters when we look at the tree as a whole, but in smaller sections of the tree.
+### Tree anotation
+
+The fully annotated tree shows that most of the mosaic variant of mtr clusters in distict part of the tree. 
+High HIC categories also clusters in some sections of the tree. 
+The sex distribution does not have major evident clusters when we look at the tree as a whole, but in smaller sections of the tree.
 
 
 ```{r, include=T, echo=F,  warning=F,fig.height=15, fig.width=15}
@@ -219,7 +222,9 @@ ggplotly(p3) %>% partial_bundle()
 
 ```
 
-### The pictures below shows subtrees (see interactive plot) we deem important and for which we will estimate the effective population size dynamics.
+### Clades
+
+The pictures below shows subtrees (see interactive plot) we deem important and for which we will estimate the effective population size dynamics.
 
 ## [Subtree 1]()
 
