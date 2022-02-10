@@ -65,7 +65,7 @@ plot(remainder_tree, show.tip.label = F)
 length(tree$tip.label); length(remainder_tree$tip.label); length(mtrSubtree$tip.label) 
 ```
 
-# Global metadata effective pupulation size analysis
+# Global metadata effective population size analysis
 
 we want to describe large clades that differ in some metadata with respect to the rest of the tree. 
 First we look at the distribution of mosaic  variants of  the genes mtr and penA, minimum inhibitory concentration (MIC) (categorised into levels high and low) levels,  and  sex  distribution, 
