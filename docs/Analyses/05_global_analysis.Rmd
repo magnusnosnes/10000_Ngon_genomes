@@ -172,7 +172,7 @@ cols =  c(brewer.pal(12,"Paired")[-12],"#FFFFFF")
 
 p2 = p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col, 
                 aes(x = dummy_bar_value,
-                fill = mtrMosaic), orientation = 'y', width = 1)+theme(legend.position="bottom")+labs(fill = "Metadata")+
+                fill = mtrMosaic), orientation = 'y', width = 1)+labs(fill = "Metadata")+
   new_scale_color()+
   geom_facet(panel = "penA MIC category", data =df_bar, geom = geom_col, 
                 aes(x = dummy_bar_value, fill = penaMicCategory
@@ -184,7 +184,7 @@ p2 = p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col,
   new_scale_color()+
    geom_facet(panel = "Sex", data =df_bar, geom = geom_col,
                  aes(x = dummy_bar_value, fill = Sex
-                 ), orientation = 'y', width =1)+theme_tree2()+scale_fill_manual(breaks=c("non-mosaic","semi-mosaic","high","low","mosaic","mosaic1","mosaic2","mosaic3","mosaic4","F","M","nd"),values=cols)#scale_fill_brewer(palette="Paired")
+                 ), orientation = 'y', width =1)+theme_tree2()+theme(legend.position="bottom")+scale_fill_manual(breaks=c("non-mosaic","semi-mosaic","high","low","mosaic","mosaic1","mosaic2","mosaic3","mosaic4","F","M","nd"),values=cols)#scale_fill_brewer(palette="Paired")
 
 
 p3=  p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col, 
