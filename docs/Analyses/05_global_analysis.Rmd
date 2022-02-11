@@ -224,8 +224,8 @@ p2
 ggplotly(p3) %>% layout(legend=list(x=0, 
                                  xanchor='left',
                                  yanchor='bottom',
-                                 orientation='h'))    %>% partial_bundle()
-
+                                 orientation='h'))   %>% partial_bundle()
+#Haven't found any good way to scale the x-width of the facets yet.
 ```
 
 ### Clades
@@ -244,34 +244,58 @@ The pictures below shows subtrees (see interactive plot) we deem important and f
 #   Testing section below                                                   ####
 
 
-# LOAD LIBS ---------------------------------------------------------------
+#LOAD LIBS ---------------------------------------------------------------
 # library(ape)
 # library(ggtree)
 # library(plotly)
-# CREATE A TREE -------------------------------------------------------------
+# #CREATE A TREE -------------------------------------------------------------
 # n_samples <- 20
 # n_grp <- 4
 # tree <- ape::rtree(n = n_samples)
-# # CREATE SOME METADATA ----------------------------------------------------
+# #CREATE SOME METADATA ----------------------------------------------------
 # id <- tree$tip.label
 # set.seed(42)
 # grp <- sample(LETTERS[1:n_grp], size = n_samples, replace = T)
 # dat <- tibble::tibble(id = id,
-#                       grp = grp)
-# # PLOT THE TREE -----------------------------------------------------------
+#                      grp = grp, dummy_bar_value = rep(1, length(grp)))
+# #PLOT THE TREE -----------------------------------------------------------
 # p1 <- ggtree(tree)
 # metat <- p1$data %>%
-#   dplyr::inner_join(dat, c('label' = 'id'))
-# p2 <- p1 +
-#   geom_point(data = metat,
-#              aes(x = x,
-#                  y = y,
-#                  colour = grp,
-#                  label = id))
-# plotly::ggplotly(p2)
+#  dplyr::inner_join(dat, c('label' = 'id'))
+# 
+# df_bar = data.frame(id=metat$label, dummy_bar_value=rep(1, length(grp)))
+# 
+# p2 <- p1
+# p2 = p2 %<+% metat
+# 
+# p2 = p2+geom_facet(panel = "Trait1",data =df_bar, geom = geom_col,
+#                  aes(x = df_bar$dummy_bar_value, fill = grp
+#                  ), orientation = 'y', width = 1)+
+#   geom_facet(panel = "Trait2",data =df_bar, geom = geom_col,
+#                  aes(x = df_bar$dummy_bar_value, fill = grp
+#                  ), orientation = 'y', width = 1)+theme_tree2()
+# p2
+# #Scale metadata axis -----------------------------------------------------------
+# 
+# ggplotly(p2) #Works fine!
+# 
+# p3=facet_widths(p2,c(Tree=12))
+# p3 #Metadata looks great
+# 
+# ggplotly(p3) #The scaled version doesn't work with plotly.
 
-# +
-#     theme_tree2(legend.position=c(.05, .85))
+# Warning message:
+# In geom2trace.default(dots[[1L]][[1L]], dots[[2L]][[1L]], dots[[3L]][[1L]]) :
+#   geom_GeomCustomAnn() has yet to be implemented in plotly.
+#   If you'd like to see this geom implemented,
+#   Please open an issue with your example code at
+#   https://github.com/ropensci/plotly/issues
+
+#+
+  # geom_facet(panel = "Trais2", data =df_bar, geom = geom_col,
+  #                aes(x = dummy_bar_value, fill = Sex
+  #                ), orientation = 'y', width = 1)
+
 
 
 #Test
