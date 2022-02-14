@@ -232,16 +232,62 @@ ggplotly(p3) %>% layout(legend=list(x=0,
 
 The pictures below shows subtrees (see interactive plot) we deem important and for which we will estimate the effective population size dynamics.
 
-## [Subtree 1]()
+MTR clusters in the upper part of the tree under node 11506. The estimated time of the most recent common ancestor (TMRCA) of this clade is around 1978.
 
-## [Subtree 2]()
+<img src="../../Files/mtr_clade.png" width="500"/> <img src="../../Files/MIC_clade1.png" width="500"/> 
+<img src="../../Files/MIC_clade2.png" width="500"/> <img src="../../Files/MIC_clade3.png" width="500"/> 
 
-## [Subtree 3]()
+
+The PenA MIC values make up three distict clusters. The first picture shows a clade with an estimated high MIC that carries a mosaic penA gene variant. The estimated tmrca of this clade around 1959.The second clade´s tmrca is around 1976, and has the same MIC and penA mosaic profile, but includes a sub-group with different form of mosaic pen-A (denoted semi-mosaic in the figure in dark blue)
+The third clade´s tmrca is approximately 1940 show a clade with high MIC, but non-mosaic penA profile. 
+
+## Population dynamcis in the clades
+
+```{r, echo=F, include=F, fig.height=10, fig.width=10}
+#TBD take screemshots of the relevant clades. 
+#Extract clade
+mtr_clade = extract.clade(tree, node=9778); mtr_clade
+penA_highMic_mosaic = extract.clade(tree, node=13077); penA_highMic_mosaic
+penA_highMic_mosaic2 = extract.clade(tree, node=12872); penA_highMic_mosaic2
+penA_highMic_nonMosaic = extract.clade(tree, node=12427); penA_highMic_nonMosaic
+
+#Run skygrowth on the clades
+skyMtr = skygrowth.map(mtr_clade); 
+skyhighMic_mosaic = skygrowth.map(penA_highMic_mosaic)
+skyhighMic_mosaic2 = skygrowth.map(penA_highMic_mosaic2)
+skyhighMic_nonMosaic = skygrowth.map(penA_highMic_nonMosaic)
+```
+
+```{r, echo=F, include=T, fig.height=10, fig.width=10, warning=F}
+#Plot skygrowth results
+g1 = custom_skygrowth_plot(skyMtr,shift_time=1978.394, logy=F)+ggtitle("Mosaic mtr",)+
+  theme(plot.title = element_text(hjust = 0.5))
+g2 = custom_skygrowth_plot(skyhighMic_mosaic, shift_time=1958.606, logy=F)+ggtitle("High MIC mosaic penA")+
+  theme(plot.title = element_text(hjust = 0.5))
+g3 = custom_skygrowth_plot(skyhighMic_mosaic2, shift_time=1976.498, logy=F)+ggtitle("High MIC mosaic penA other clade")+
+  theme(plot.title = element_text(hjust = 0.5))
+g4 = custom_skygrowth_plot(skyhighMic_nonMosaic, shift_time=1940.751, logy=F)+ggtitle("High MIC non-mosaic penA")+
+  theme(plot.title = element_text(hjust = 0.5))
+grid.arrange(g1,g2,g3,g4,ncol=2)
+```
+
+
+
 
 ```{r,  include=F, echo=F, warning=F, fig.height=10, fig.width=10}
 
 #   ____________________________________________________________________________
-#   Testing section below                                                   ####
+#   Testing section                                                         ####
+
+# 
+# ##Test ggtree and phylo node labeling: 
+# test_tree = rtree(10)
+# 
+# ggtree(test_tree)+geom_text2(aes(subset=!isTip, label=node), hjust=-.3)+geom_tiplab()
+# 
+# plot.phylo(test_tree)
+# nodelabels()
+
 
 
 #LOAD LIBS ---------------------------------------------------------------

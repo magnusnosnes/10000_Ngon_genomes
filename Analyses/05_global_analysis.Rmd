@@ -56,5 +56,11 @@ dev.off()
 ```
 
 
-## MTR clusters closely 
+## MTR clusters in the upper part of the tree. 
+[<img src="../Files/mtr_clade.png" width="500"/>](Analyses/global_analysis.html)
 
+
+```{r, include=T, echo=F}
+
+
+``` 

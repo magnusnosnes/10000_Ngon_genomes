@@ -66,5 +66,5 @@ This analysis explores the relation of the growth rate of the transmission in th
 
 [<img src="Files/Global_analysis.png" width="500"/>](Analyses/global_analysis.html)
 
-This analysis does not define clades based on the concept of transmission lineages as above, but instead focuses on large clades defined by metadata such as genees: mtr mosaic and penA mosaic, MIC category (high or low), and sex distribution. We describe the effective population size dynamics in the large clades and relate this to the metadata. 
+This analysis does not define clades based on the concept of transmission lineages as above, but instead focuses on large clades defined by metadata such as the genes: mtr mosaic and penA mosaic, MIC category (high or low), and sex distribution. We describe the effective population size dynamics in the large clades and relate this to the metadata. 
 
