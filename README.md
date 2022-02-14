@@ -1,5 +1,5 @@
 
-### This repository describes the workflow and analyses of the 1000 genomes of *Neisseria gonorrhoeae*
+### This repository describes the workflow and analyses of the 10000 genomes of *Neisseria gonorrhoeae*
 
 The aim of this project was investigate global transmission dynamics of
 *Neisseria gonorrhoeae* in the period 2015 - 2018. We have made a
