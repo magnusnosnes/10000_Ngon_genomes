@@ -92,7 +92,7 @@ custom_skygrowth_plot <- function( fit,shift_time=NA,ggplot=TRUE, logy=TRUE,xnam
 ```
 
 
-```{r warning=FALSE, include=F, fig.height=15, fig.width=15, echo=F}
+```{r echo=F, fig.height=15, fig.width=15, warning=FALSE, include=F}
 
 #   ____________________________________________________________________________
 #   Skygrowth on important nodes                                            ####
