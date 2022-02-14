@@ -234,8 +234,8 @@ The pictures below shows subtrees (see interactive plot) we deem important and f
 
 MTR clusters in the upper part of the tree under node 11506. The estimated time of the most recent common ancestor (TMRCA) of this clade is around 1978.
 
-<img src="../../Files/mtr_clade.png" width="500"/> <img src="../../Files/MIC_clade1.png" width="500"/> 
-<img src="../../Files/MIC_clade2.png" width="500"/> <img src="../../Files/MIC_clade3.png" width="500"/> 
+<img src="../../Files/mtr_clade.png" alt="mtr clade" width="400"/> <img src="../../Files/MIC_clade1.png" alt="High MIC mosaic" width="400"/> 
+<img src="../../Files/MIC_clade2.png" alt="another High MIC mosaic" width="400"/> <img src="../../Files/MIC_clade3.png" alt="High MIC non-mosaic" width="400"/> 
 
 
 The PenA MIC values make up three distict clusters. The first picture shows a clade with an estimated high MIC that carries a mosaic penA gene variant. The estimated tmrca of this clade around 1959.The second clade´s tmrca is around 1976, and has the same MIC and penA mosaic profile, but includes a sub-group with different form of mosaic pen-A (denoted semi-mosaic in the figure in dark blue)
