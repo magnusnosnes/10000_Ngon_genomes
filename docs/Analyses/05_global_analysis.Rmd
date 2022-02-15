@@ -306,13 +306,17 @@ grid.arrange(g5,g6,g7,g8,ncol=2)
 ```
 
 All of the clades grew in the period 1980-2010. After 2010 the effective population size falls for all the clades define by penA variants, while mtr continues growing or alternatively stablizes. 
-The effective population size in the tree as a whole is shown below.
+The effective population size in the tree as a whole is shown below. The clades from above are highlighted.
 
 ```{r, echo=F, include=T, fig.height=10, fig.width=10, warning=F}
 g5 = custom_skygrowth_plot(skyFullTree, shift_time=1750, logy=F)+ggtitle("Full Tree")+
   theme(plot.title = element_text(hjust = 0.5))+scale_y_continuous(limits=c(0,20000), oob=rescale_none)+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))
 
-g6 = ggtree(tree,mrsd="2019-08-01")+theme_tree2()+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))+theme_bw()+ylab("Tree position")+theme(axis.ticks.y = element_blank())
+g6 = ggtree(tree,mrsd="2019-08-01")+theme_tree2()+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))+theme_bw()+ylab("Tree position")+theme(axis.ticks.y = element_blank())+geom_highlight(node=9778,fill="green")+geom_highlight(node=9778,col="lightgreen")+
+  geom_highlight(node=13077,fill="steelblue")+
+  geom_highlight(node=12872,fill="yellow")+
+  geom_highlight(node=12427,fill="red")
+
 grid.arrange(g6,g5,ncol=1)
 ```
 
