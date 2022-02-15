@@ -312,7 +312,7 @@ The effective population size in the tree as a whole is shown below.
 g5 = custom_skygrowth_plot(skyFullTree, shift_time=1750, logy=F)+ggtitle("Full Tree")+
   theme(plot.title = element_text(hjust = 0.5))+scale_y_continuous(limits=c(0,20000), oob=rescale_none)+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))
 
-g6 = ggtree(tree,mrsd="2019-08-01")+theme_tree2()+scale_x_continuous(expand=c(0,0),breaks=seq(1750,2020,20))
+g6 = ggtree(tree,mrsd="2019-08-01")+theme_tree2()+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))+theme_bw()+ylab("Tree position")+theme(axis.ticks.y = element_blank())
 grid.arrange(g6,g5,ncol=1)
 ```
 
