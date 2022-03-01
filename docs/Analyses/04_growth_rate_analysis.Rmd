@@ -154,6 +154,7 @@ return_growth_interval=function(clusterwise_output, period=c(2010,2017), shift_t
   } 
   return(average_growth_rate)
 }
+
 #Extract the growth rates on the intervals 2014-2017: This may not be meaningful. 
 r_NOR = return_growth_interval(clusterwise_output=neg_sizes_NOR, time_shift_list=cluster_times_NOR)
 r_AUS = return_growth_interval(clusterwise_output=neg_sizes_AUS, time_shift_list=cluster_times_AUS)
@@ -223,16 +224,19 @@ The input for the following analyses are all the transmission lineages containin
 ### Transmission lineages in Norway
 
 ```{r, echo=FALSE}
+
 noquote("Size of transmission lineages containing more than 10 sequences:")
 Result_NOR$Lineage_sizes[Result_NOR$Lineage_sizes>10]
 noquote("Number of transmission containing more than 10 sequences:")
 length(Result_NOR$Halfedge_over_tmrca[Result_NOR$Lineage_sizes>10])
+
 ``` 
 
 
 With estimated arrival times (midpoint of the ancestral branch of the transmission lineage) in Norway:  
 
 ```{r, echo=FALSE}
+
 noquote("Estimated arrival time in Norway")
 Result_NOR$Halfedge_over_tmrca[Result_NOR$Lineage_sizes>10]
 
@@ -299,12 +303,13 @@ str(total_data)
 library(grid)
 g2 = ggplot(total_data)+theme_bw()+geom_point(aes(x=tlSize, y=GrowthRate,color=locations))+theme(legend.position = c(0.8,0.8))+ylab("Growth rate")+xlab("Transmission lineage size")
 g2
+
 ```
 
 Here we investigate the growth rate and size of the transmission lineages, and the relation of these to the explanatory variables: penA, mtrD, sex distribution and location. 
 
-```{r, echo=FALSE, include = T}
-g1 = ggplot(total_data)+theme_bw()+geom_point(aes(x=sexDistribution, y=GrowthRate))+ylab("Growth rate")
+```{r, echo=FALSE, include = T, warning=F, message=F}
+g1 = ggplot(total_data, aes(x=sexDistribution, y=GrowthRate, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Growth rate")+theme(legend.position = "none")+geom_smooth(method="lm",alpha=0.15)
 g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=GrowthRate,color=locations))+theme(legend.position = "none")
 g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=GrowthRate))+ylab("Growth rate")
 g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=GrowthRate))+ylab("Growth rate")
@@ -313,8 +318,8 @@ grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
 
 Lineage size versus variables explanatory variables
 
-```{r, echo=FALSE, include = T}
-g1 = ggplot(total_data)+theme_bw()+geom_point(aes(x=sexDistribution, y=tlSize))+ylab("Transmission lineage size")
+```{r, echo=FALSE, include = T, warning=F, message=F}
+g1 = ggplot(total_data,aes(x=sexDistribution, y=tlSize, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Transmission lineage size")+theme(legend.position="none")+geom_smooth(method="lm", alpha=0.15)
 g2 = ggplot(total_data)+theme_bw()+geom_point(aes(x=locations, y=tlSize,color=locations))+theme(legend.position = "none")+ylab("Transmission lineage size")
 g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=tlSize))+ylab("Transmission lineage size")
 g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=tlSize))+ylab("Transmission lineage size")
