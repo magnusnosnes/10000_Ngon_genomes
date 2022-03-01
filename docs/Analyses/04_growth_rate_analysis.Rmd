@@ -320,7 +320,7 @@ Lineage size versus variables explanatory variables
 
 ```{r, echo=FALSE, include = T, warning=F, message=F}
 g1 = ggplot(total_data,aes(x=sexDistribution, y=tlSize, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Transmission lineage size")+theme(legend.position="none")+geom_smooth(method="lm", alpha=0.15)
-g2 = ggplot(total_data)+theme_bw()+geom_point(aes(x=locations, y=tlSize,color=locations))+theme(legend.position = "none")+ylab("Transmission lineage size")
+g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=tlSize,color=locations))+theme(legend.position = "none")+ylab("Transmission lineage size")
 g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=tlSize))+ylab("Transmission lineage size")
 g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=tlSize))+ylab("Transmission lineage size")
 grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
