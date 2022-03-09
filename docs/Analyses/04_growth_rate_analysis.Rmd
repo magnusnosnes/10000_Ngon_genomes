@@ -33,6 +33,7 @@ library(phylodyn)
 path_main = "~/Dropbox/10000_Lovers/Phylogeography"
 path_data = "~/Dropbox/10000_Lovers/01_LineageHomology/11_saved_data/"
 path_results = "~/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/"
+path_final_figures = "~/Dropbox/10000_Lovers/01_LineageHomology/99_Figures_for_paper/"
 
 source("~/Dropbox/10000_Lovers/01_LineageHomology/sourcefunctions/environment_variables.R")
 
@@ -389,4 +390,24 @@ summary(mod3)
 ```
 
 
+```{r, echo=FALSE, include = F}
+library(svglite)
+g1 = ggplot(total_data, aes(x=sexDistribution, y=GrowthRate, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Growth rate")+theme(legend.position = "none")
+g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=GrowthRate,color=locations))+theme(legend.position = "none")
+g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=GrowthRate))+ylab("Growth rate")
+g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=GrowthRate))+ylab("Growth rate")
 
+svglite(file=paste0(path_final_figures,"GrowthRates_on_metadata.svg"))
+grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
+dev.off()
+
+
+g1 = ggplot(total_data,aes(x=sexDistribution, y=tlSize, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Transmission lineage size")+theme(legend.position="none")
+g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=tlSize,color=locations))+theme(legend.position = "none")+ylab("Transmission lineage size")
+g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=tlSize))+ylab("Transmission lineage size")
+g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=tlSize))+ylab("Transmission lineage size")
+
+svglite(file=paste0(path_final_figures,"TLSize_on_metadata.svg"))
+grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
+dev.off()
+```

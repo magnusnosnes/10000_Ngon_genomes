@@ -72,23 +72,7 @@ First we look at the distribution of mosaic  variants of  the genes mtr and penA
 
 ```{r,include=F}
 #Define skygrowth with shifted time
-custom_skygrowth_plot <- function( fit,shift_time=NA,ggplot=TRUE, logy=TRUE,xname=NA,xlimits=NA){
-  ne <- fit$ne
-  fit$time<-fit$time+shift_time
-  pldf <- data.frame( t = fit$time,  nemed = ne, nelb = fit$ne_ci[,1], neub = fit$ne_ci[,3] )
-  pl <- ggplot2::ggplot( pldf, ggplot2::aes_( x = ~ t, y = ~ nemed)) + ggplot2::geom_line()+ ggplot2::ylab('Effective population size') +xlab("Time")+theme_bw()
-  pl <- pl + ggplot2::geom_ribbon( ggplot2::aes_( ymin = ~ nelb, ymax = ~ neub), fill = 'blue', alpha = .2)
-  if(logy==T){
-    pl <- pl + ggplot2::scale_y_log10()  
-  }
-  if(is.na(xlimits)==F){
-    ind_select = which(fit$time>=xlimits)
-    fit$ne_ci[ind_select,]; ylims = range(fit$ne_ci[ind_select,])
-    pl<-pl+lims(x=c(xlimits,NA),y=ylims)
-  }
-  return(pl)
-}
-
+source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/Custom_skygrowth_plot.R")
 ```
 
 
@@ -111,13 +95,38 @@ custom_skygrowth_plot <- function( fit,shift_time=NA,ggplot=TRUE, logy=TRUE,xnam
 #construct consise data
 #NB: GGtree needs an "id" for tree tip labels
 #Example: #library(TDbook); head(TDbook::df_info)
+library(countrycode)
+#1: Fond continent of indexs.
+#2 If indexes in main locations, use those
+#3: Else use the respective continent
+#Shade continent 
+
+countries = as.character(sample_data$country[match_tiplabels])
+#Arbitrary matching to a country in correct continent
+translate = c("Scotland"="France", "Asia"="China", "Caribbean"="Cuba","Brasil"="Argentina")
+inds = which(countries %in% c("Asia", "Brasil", "Caribbean", "Scotland"))
+
+countries[inds] = as.vector(translate[as.vector(countries[inds])])
+continent <- countrycode(sourcevar = countries,
+                            origin = "country.name",
+                            destination = "continent")
+main_locations =c("Norway","USA", "Australia")
+
+locations_for_annotation = unlist(
+  lapply(
+    seq_along(countries),
+    FUN = function(i) ifelse(countries[i]%in% main_locations, countries[i], continent[i]
+                             )))
+locations_for_annotation[is.na(locations_for_annotation)]="nd"
+
 
 metaDataTimeTree = data.frame("id"=tree$tip.label,
                               "penaMosaic"= penA$mosaic[match_tiplabels_penA],
                               "penaMicCategory"= penA$ESC_MIC_category[match_tiplabels_penA],
                               "mtrMosaic"=mtr$mtrD_mosaic[match_tiplabels_mtrD],
                               "mtrindels"=mtr$mtrR_indels[match_tiplabels_mtrD],
-                              "Sex"=sample_data$Sex[match_tiplabels])
+                              "Sex"=sample_data$Sex[match_tiplabels], 
+                              "locations" = locations_for_annotation)
 
 
 
@@ -185,6 +194,7 @@ p2 = p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col,
    geom_facet(panel = "Sex", data =df_bar, geom = geom_col,
                  aes(x = dummy_bar_value, fill = Sex
                  ), orientation = 'y', width =1)+theme_tree2()+theme(legend.position="bottom")+scale_fill_manual(breaks=c("non-mosaic","semi-mosaic","high","low","mosaic","mosaic1","mosaic2","mosaic3","mosaic4","F","M","nd"),values=cols)#scale_fill_brewer(palette="Paired")
+
 
 
 p3=  p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col, 
@@ -291,6 +301,7 @@ grid.arrange(g1,g2,g3,g4,ncol=2)
  
 ```{r, echo=F, include=T, fig.height=10, fig.width=10, warning=F}
 g5 = ggtree(penA_highMic_mosaic2,mrsd="2018-11-02")+theme_tree2()+scale_x_continuous(expand=c(0,0),breaks=seq(1970,2020,10))+theme_bw()+ylab("Tree position")+ theme(axis.ticks.y = element_blank())
+
 g6 = ggtree(penA_highMic_nonMosaic,mrsd="2019-07-20")+theme_tree2()+scale_x_continuous(expand=c(0,0),breaks=seq(1940,2020,20))+theme_bw()+ylab("Tree position")+theme(axis.ticks.y = element_blank())
 
 g7 = custom_skygrowth_plot(skyhighMic_mosaic2, shift_time=1976.498, logy=F)+scale_x_continuous(expand=c(0,0),breaks=seq(1980,2020,10))+ggtitle("High MIC mosaic penA other clade")+
@@ -324,6 +335,39 @@ The high effective population size from 1770-1800 is a result of the long basal 
 From 1810-2010 the effective population size have been steadily growing, with a pronounced decrease since 2010.
 
 ```{r,  include=F, echo=F, warning=F, fig.height=10, fig.width=10}
+
+
+#   ____________________________________________________________________________
+#   Results                                                                 ####
+
+
+
+#   ____________________________________________________________________________
+#   Figure 1                                                                ####
+
+
+source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/Annotation_w_settings.R")
+
+#svglite
+annotate(tree, size=0.2)
+#dev.off()
+
+#Figure 1: panel B:
+custom_skygrowth_plot(skyFullTree, shift_time=1750, logy=F, fill_color = "black")+ggtitle("Full Tree")+
+  theme(plot.title = element_text(hjust = 0.5))+scale_y_continuous(limits=c(0,20000), oob=rescale_none)+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))
+
+#Plot skygrowth results
+source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/subtree_plots.R")
+
+#Figure 1: panel C:
+#Clade:
+subtree_plots1(color1="#E69F00", color2="#56B4E9")
+#Clade:
+subtree_plots2(color1="#009E73", color2="#CC79A7")
+
+
+
+
 
 #   ____________________________________________________________________________
 #   Testing section                                                         ####
