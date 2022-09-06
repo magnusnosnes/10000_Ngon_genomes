@@ -63,6 +63,30 @@ plot(remainder_tree, show.tip.label = F)
 
 #Checking that tree has been split correctly.
 length(tree$tip.label); length(remainder_tree$tip.label); length(mtrSubtree$tip.label) 
+
+
+
+#   ____________________________________________________________________________
+#   Temporary section to save some files, can be removed.                   ####
+# plot.phylo(mtrSubtree,show.tip.label=F)
+# tmp = metaDataTimeTree[which(metaDataTimeTree$id %in% mtrSubtree$tip.label),]
+# mtr_temp = mtr[match_tiplabels_mtrD,]
+# metaDataTmp = data.frame("id"=tree$tip.label,
+#                               "penaMosaic"= penA$mosaic[match_tiplabels_penA],
+#                               "penaMicCategory"= penA$ESC_MIC_category[match_tiplabels_penA],
+#                               "Sex"=sample_data$Sex[match_tiplabels], 
+#                               "locations" = locations_for_annotation)
+# mtr_clade_metadata = cbind(metaDataTmp, mtr_temp)
+# mtr_clade_metadata = full_data_tmp[which(metaDataTmp$id %in% mtrSubtree$tip.label),]
+# save(mtr_clade_metadata, file="~/Dropbox/10000_Lovers/01_LineageHomology/11_saved_data/mtr_clade_metada.Rdata")
+# load(file="~/Dropbox/10000_Lovers/01_LineageHomology/11_saved_data/mtr_clade_metada.Rdata")
+# write.csv(mtr_clade_metadata, file="~/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/mtr_clade_metada.csv")
+# read.csv(file="~/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/mtr_clade_metada.csv")
+# write.tree(mtrSubtree, file="~/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/mtr_clade.nwk")
+# mtrSubtree = read.tree( file="~/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/mtr_clade.nwk")
+#   ____________________________________________________________________________
+#   End temp section                                                        ####
+
 ```
 
 # Global metadata effective population size analysis
@@ -119,6 +143,16 @@ locations_for_annotation = unlist(
                              )))
 locations_for_annotation[is.na(locations_for_annotation)]="nd"
 
+#Set up MLST:
+#Use the 21 most common categories (since "no data" is one of them).
+#Remove remaining categories
+MLST_for_annotation = as.character(sample_data$MLST[match_tiplabels])
+top_21_mlst = names(sort(table(MLST_for_annotation),decreasing = T))[1:21]; sort(table(MLST_for_annotation),decreasing = T)[23]
+hist(sort(table(MLST_for_annotation),decreasing = T)[-c(1,2)])
+MLST_for_annotation[(MLST_for_annotation %in% top_21_mlst)==F]="other"
+
+
+sort(table(sample_data$MLST[match_tiplabels_mtrD]))
 
 metaDataTimeTree = data.frame("id"=tree$tip.label,
                               "penaMosaic"= penA$mosaic[match_tiplabels_penA],
@@ -126,7 +160,8 @@ metaDataTimeTree = data.frame("id"=tree$tip.label,
                               "mtrMosaic"=mtr$mtrD_mosaic[match_tiplabels_mtrD],
                               "mtrindels"=mtr$mtrR_indels[match_tiplabels_mtrD],
                               "Sex"=sample_data$Sex[match_tiplabels], 
-                              "locations" = locations_for_annotation)
+                              "locations" = locations_for_annotation,
+                              "MLST"=MLST_for_annotation)
 
 
 
@@ -291,6 +326,7 @@ g3 = custom_skygrowth_plot(skyMtr,shift_time=1978.394, logy=F)+ggtitle("Mosaic m
 g4 = custom_skygrowth_plot(skyhighMic_mosaic, shift_time=1958.606, logy=F)+ggtitle("High MIC mosaic penA")+scale_x_continuous(expand=c(0,0),breaks=seq(1960,2020,20))+
   theme(plot.title = element_text(hjust = 0.5))
 
+
 grid.arrange(g1,g2,g3,g4,ncol=2)
 
 
@@ -349,22 +385,30 @@ From 1810-2010 the effective population size have been steadily growing, with a 
 source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/Annotation_w_settings.R")
 
 #svglite
-annotate(tree, size=0.2)
+pdf(paste0(path_results,"/02_Figure_2/annotated_phylogeny_without_location.pdf"), width=15,height=15, onefile = F)
+p2 = annotate(tree, size=0.2)
+p2
+dev.off()
+
 #dev.off()
 
 #Figure 1: panel B:
+pdf(paste0(path_results,"/02_Figure_2/skygrowth_full_tree.pdf"), width=10,height=7) 
 custom_skygrowth_plot(skyFullTree, shift_time=1750, logy=F, fill_color = "black")+ggtitle("Full Tree")+
   theme(plot.title = element_text(hjust = 0.5))+scale_y_continuous(limits=c(0,20000), oob=rescale_none)+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))
-
+dev.off()
 #Plot skygrowth results
 source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/subtree_plots.R")
 
 #Figure 1: panel C:
 #Clade:
+pdf(paste0(path_results,"/02_Figure_2/clades_1_2.pdf"), width=10,height=10)
 subtree_plots1(color1="#E69F00", color2="#56B4E9")
+dev.off()
 #Clade:
+pdf(paste0(path_results,"/02_Figure_2/clades_3_4.pdf"), width=10,height=10)
 subtree_plots2(color1="#009E73", color2="#CC79A7")
-
+dev.off()
 
 
 
