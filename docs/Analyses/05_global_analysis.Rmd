@@ -46,10 +46,10 @@ library(plotly)
 
 ## Better way of doing this is by using a interactive phylogeny app
 
-pdf("~/Dropbox/Testing_folder/tree.pdf",width = 30,height = 30)
-plot(tree, show.tip.label = F)
-nodelabels(cex =0.25)
-dev.off()
+#pdf("~/Dropbox/Testing_folder/tree.pdf",width = 30,height = 30)
+#plot(tree, show.tip.label = F)
+#nodelabels(cex =0.25)
+#dev.off()
 
 #nts: can run the app to find the appropriate node number.
 mtrSubtreeNode = 9779
@@ -57,9 +57,9 @@ timeShift = 1750+nodeheight(tree, node=9779) #Root time for the subclade.
 
 #Extract and plot trees
 mtrSubtree = extract.clade(tree, node = 9779)
-plot(mtrSubtree,show.tip.label = F)
+#plot(mtrSubtree,show.tip.label = F)
 remainder_tree = drop.tip(tree, tip = mtrSubtree$tip.label)
-plot(remainder_tree, show.tip.label = F)
+#plot(remainder_tree, show.tip.label = F)
 
 #Checking that tree has been split correctly.
 length(tree$tip.label); length(remainder_tree$tip.label); length(mtrSubtree$tip.label) 
@@ -214,21 +214,21 @@ df_bar = data.frame(id=tree$tip.label, dummy_bar_value=rep(1, length(tree$tip.la
 p1 = p %<+% metaDataTimeTree
 cols =  c(brewer.pal(12,"Paired")[-12],"#FFFFFF")
 
-p2 = p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col, 
-                aes(x = dummy_bar_value,
-                fill = mtrMosaic), orientation = 'y', width = 1)+labs(fill = "Metadata")+
-  new_scale_color()+
-  geom_facet(panel = "penA MIC category", data =df_bar, geom = geom_col, 
-                aes(x = dummy_bar_value, fill = penaMicCategory
-                ), orientation = 'y', width =1)+
-  new_scale_color()+
-   geom_facet(panel = "penAMosaic", data =df_bar, geom = geom_col,
-                 aes(x = dummy_bar_value, fill = penaMosaic
-                 ), orientation = 'y', width =1)+
-  new_scale_color()+
-   geom_facet(panel = "Sex", data =df_bar, geom = geom_col,
-                 aes(x = dummy_bar_value, fill = Sex
-                 ), orientation = 'y', width =1)+theme_tree2()+theme(legend.position="bottom")+scale_fill_manual(breaks=c("non-mosaic","semi-mosaic","high","low","mosaic","mosaic1","mosaic2","mosaic3","mosaic4","F","M","nd"),values=cols)#scale_fill_brewer(palette="Paired")
+# p2 = p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col, 
+#                 aes(x = dummy_bar_value,
+#                 fill = mtrMosaic), orientation = 'y', width = 1)+labs(fill = "Metadata")+
+#   new_scale_color()+
+#   geom_facet(panel = "penA MIC category", data =df_bar, geom = geom_col, 
+#                 aes(x = dummy_bar_value, fill = penaMicCategory
+#                 ), orientation = 'y', width =1)+
+#   new_scale_color()+
+#    geom_facet(panel = "penAMosaic", data =df_bar, geom = geom_col,
+#                  aes(x = dummy_bar_value, fill = penaMosaic
+#                  ), orientation = 'y', width =1)+
+#   new_scale_color()+
+#    geom_facet(panel = "Sex", data =df_bar, geom = geom_col,
+#                  aes(x = dummy_bar_value, fill = Sex
+#                  ), orientation = 'y', width =1)+theme_tree2()+theme(legend.position="bottom")+scale_fill_manual(breaks=c("non-mosaic","semi-mosaic","high","low","mosaic","mosaic1","mosaic2","mosaic3","mosaic4","F","M","nd"),values=cols)#scale_fill_brewer(palette="Paired")
 
 
 
@@ -243,7 +243,24 @@ p3=  p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col,
                  ), orientation = 'y', width = 1)+
    geom_facet(panel = "Sex", data =df_bar, geom = geom_col,
                  aes(x = dummy_bar_value, fill = Sex
-                 ), orientation = 'y', width = 1)+theme_tree2()+scale_fill_manual(breaks=c("non-mosaic","semi-mosaic","high","low","mosaic","mosaic1","mosaic2","mosaic3","mosaic4","F","M","nd"),values=cols)#scale_fill_brewer(palette="Paired")
+                 ), orientation = 'y', width = 1)+
+  geom_facet(
+      panel = "MLST",
+      data = df_bar,
+      geom = geom_col,
+      aes(x = dummy_bar_value, fill = MLST),
+      orientation = 'y',
+      width = 1
+    ) +
+    geom_facet(
+      panel = "Location",
+      data = df_bar,
+      geom = geom_col,
+      aes(x = dummy_bar_value, fill = locations),
+      orientation = 'y',
+      width = 1
+    )+
+  theme_tree2()+scale_fill_manual(breaks=c("non-mosaic","semi-mosaic","high","low","mosaic","mosaic1","mosaic2","mosaic3","mosaic4","F","M","nd", unique(metaDataTimeTree$locations), unique(metaDataTimeTree$MLST)),values=c(cols,"#A6CEE3","#1F78B4","#B2DF8A","#33A02C","#FB9A99", "#E31A1C","#FFFF99","#FFFFFF",'#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#ffffff', '#000000',"#FF7F00"))#scale_fill_brewer(palette="Paired")
 
 
 
@@ -258,7 +275,10 @@ The sex distribution does not have major evident clusters when we look at the tr
 
 ```{r, include=T, echo=F,  warning=F,fig.height=15, fig.width=15}
 #Adjust the facet_widths. 
-p2 = facet_widths(p2, c(Tree=12))
+# p2 = facet_widths(p2, c(Tree=12))
+# p2
+source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/Annotation_w_settings.R")
+p2 = annotate(tree,extra_dat = metaDataTimeTree,size=0.2)
 p2
 ```
 
@@ -382,33 +402,33 @@ From 1810-2010 the effective population size have been steadily growing, with a 
 #   Figure 1                                                                ####
 
 
-source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/Annotation_w_settings.R")
+#source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/Annotation_w_settings.R")
 
 #svglite
-pdf(paste0(path_results,"/02_Figure_2/annotated_phylogeny_without_location.pdf"), width=15,height=15, onefile = F)
-p2 = annotate(tree, size=0.2)
-p2
-dev.off()
+#pdf(paste0(path_results,"/02_Figure_2/annotated_phylogeny_without_location.pdf"), width=15,height=15, onefile = F)
+#p2 = annotate(tree, size=0.2)
+#p2
+#dev.off()
 
 #dev.off()
 
 #Figure 1: panel B:
-pdf(paste0(path_results,"/02_Figure_2/skygrowth_full_tree.pdf"), width=10,height=7) 
+#pdf(paste0(path_results,"/02_Figure_2/skygrowth_full_tree.pdf"), width=10,height=7) 
 custom_skygrowth_plot(skyFullTree, shift_time=1750, logy=F, fill_color = "black")+ggtitle("Full Tree")+
   theme(plot.title = element_text(hjust = 0.5))+scale_y_continuous(limits=c(0,20000), oob=rescale_none)+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))
-dev.off()
+#dev.off()
 #Plot skygrowth results
-source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/subtree_plots.R")
+#source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/subtree_plots.R")
 
 #Figure 1: panel C:
 #Clade:
-pdf(paste0(path_results,"/02_Figure_2/clades_1_2.pdf"), width=10,height=10)
-subtree_plots1(color1="#E69F00", color2="#56B4E9")
-dev.off()
+#pdf(paste0(path_results,"/02_Figure_2/clades_1_2.pdf"), width=10,height=10)
+#subtree_plots1(color1="#E69F00", color2="#56B4E9")
+#dev.off()
 #Clade:
-pdf(paste0(path_results,"/02_Figure_2/clades_3_4.pdf"), width=10,height=10)
-subtree_plots2(color1="#009E73", color2="#CC79A7")
-dev.off()
+#pdf(paste0(path_results,"/02_Figure_2/clades_3_4.pdf"), width=10,height=10)
+#subtree_plots2(color1="#009E73", color2="#CC79A7")
+#dev.off()
 
 
 
