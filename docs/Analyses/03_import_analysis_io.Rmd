@@ -7,7 +7,7 @@ knit: (function(input_file, encoding) {
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
 # Import and local transmission analysis
@@ -24,6 +24,8 @@ library(gridExtra)
 library(ggplot2)
 library(phylodyn)
 library(pbapply)
+library(dplyr)
+library(grid)
 
 #Notes:
 #Time consuming sections are commented out. The results are saved and loaded on new runs instead of rerunning every time. 
@@ -34,18 +36,26 @@ library(pbapply)
 path_main = "~/Dropbox/10000_Lovers/Phylogeography"
 path_data = "~/Dropbox/10000_Lovers/01_LineageHomology/11_saved_data/"
 path_results = "~/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/"
-
 source("~/Dropbox/10000_Lovers/01_LineageHomology/sourcefunctions/environment_variables.R")
+
 ```
 
-The input for this analysis is the results from the maximum likelihood geographical state mapping on the full phylogenetic tree. 
+The input for this analysis is the results from the maximum likelihood mapping of the geographical states on the full phylogenetic tree of the 9732 genomes. 
 
 ```{r, include=FALSE}
+#Load maximum likelihood mappings.
+load(file=paste0(path_data,"Result_USA.Rdata"))
+load(file=paste0(path_data,"Result_EUR.Rdata"))
+load(file=paste0(path_data,"Result_AUS.Rdata"))
+load(file=paste0(path_data,"Result_NOR.Rdata"))
+
 #Names of the norwegian sequences
 nor_tips = names(locations_NOR[which(locations_NOR=="Norway")])
 aus_tips = names(locations_NOR[which(locations_AUS=="Australia")])
 usa_tips = names(locations_NOR[which(locations_USA=="A_USA")])
 eur_tips = names(locations_NOR[which(locations_EUR=="Europe")])
+
+
 
 #Replicate transmission lineage (TL) counts.
 # This has been run
@@ -104,17 +114,19 @@ load(file=paste0(path_results,"replicates_AUS.Rdata"))
 load(file=paste0(path_results,"replicates_USA.Rdata"))
 load(file=paste0(path_results,"replicates_EUR.Rdata"))
 
+
+
 #With export
 #load(file="~/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/test_export_Norway.Rdata")
 ```
 
-## Import versus local transmission for Norway, Australia and USA
+## Import versus local transmission for Norway, Australia, Europe and the USA
 
 From the mapped geographical lineage distributions we can derive the number of importation and local transmission events for each location (based on the available sequences). NB. we do not account for unobserved infections (sequences), and hence the estimated number only reflects the fraction of *sequenced* genomes that is assigned to specific lineages. The relative growth between the lineages (growth of an transmission lineage implies local transmission), is an important quantity and tells us how dominant specific lineages have become over time. This too could be affected by nonrandom sampling such as targeted sampling of lineages with anitibiotic resistance. 
 
 
 
-```{r, include=TRUE}
+```{r, include=FALSE}
 #c1 = LineageHomology::Summarize_import_local_transmission(replicates_NOR); c1
 #c2 = LineageHomology::Summarize_import_local_transmission(replicates_AUS); c2
 #c3 = LineageHomology::Summarize_import_local_transmission(replicates_USA); c3
@@ -141,6 +153,11 @@ LineageHomology::lineage_growth_cumulative(linfo_AUS,datelims=c("2016-07-01","20
 name_date_USA = name_date[name_date$name%in%usa_tips,]
 linfo_USA = lineage_info(Result_USA,name_date = name_date_USA)
 LineageHomology::lineage_growth_cumulative(linfo_USA,datelims=c("2008-07-01","2019-06-15","2 year"))
+
+name_date_EUR = name_date[name_date$name%in%eur_tips,]
+linfo_EUR = lineage_info(Result_EUR,name_date = name_date_EUR)
+LineageHomology::lineage_growth_cumulative(linfo_EUR,datelims=c("2008-07-01","2019-06-15","2 year"))
+
 
 ```
 
@@ -192,6 +209,10 @@ c2 = Summarize_import_export_local_transmission(implocexp_AUS); c2
 c3 = Summarize_import_export_local_transmission(implocexp_USA); c3
 c3 = Summarize_import_export_local_transmission(implocexp_EUR); c3
 
+```
+ 
+```{r, include=F}
+# Utility functions for this script.
 utility_f1 = function(implocexp){
   #Define time intervals
   t_i = c(2000,2010,2010,2014,2014,2020,2000,2020)
@@ -216,11 +237,12 @@ utility_f1 = function(implocexp){
 
 make_boxplot_frame_import_export_local_transmission = function(implocexp, location="Test"){
   t_i = c(2010,2014,2014,2018,2010,2018)
-  library("dplyr") #Imports the pipe operator
+  #Imports the pipe operator
   #Set up a dataset with a categorical time frame with the given time intervals
+  #Requires dplyr
   
-  ggdat = data.frame(matrix(nrow=0,ncol=length(col_names)))
   col_names = c("Import", "Export", "LC", "Period")
+  ggdat = data.frame(matrix(nrow=0,ncol=length(col_names)))
   colnames(ggdat)=col_names
   
   for(i in seq(1,6,2)){
@@ -240,15 +262,6 @@ make_boxplot_frame_import_export_local_transmission = function(implocexp, locati
   return(ggdat)
 }
 
-ggdat1 = make_boxplot_frame_import_export_local_transmission(implocexp_NOR, location="NOR")
-ggdat2 = make_boxplot_frame_import_export_local_transmission(implocexp_AUS, location="AUS")
-comparison_NOR_AUS = rbind(ggdat1, ggdat2)
-
-ggdat1 = make_boxplot_frame_import_export_local_transmission(implocexp_USA, location="USA")
-ggdat2 = make_boxplot_frame_import_export_local_transmission(implocexp_EUR, location="EUR")
-comparison_USA_EUR = rbind(ggdat1, ggdat2)
-
-
 boxplot_boxplot_frame = function(boxplot_frame,variable="Import", x_lab="") {
   library(ggplot2)
   ggplot(boxplot_frame)+geom_boxplot(aes(x=Period,y=boxplot_frame[,variable],color=Location))+theme_bw()+
@@ -256,21 +269,9 @@ boxplot_boxplot_frame = function(boxplot_frame,variable="Import", x_lab="") {
     ggtitle(variable)+
     theme(plot.title = element_text(hjust = 0.5))+
     scale_color_manual(values = c("#1F85DE", "#DE781F"))
+
   
 }
-
-library(grid)
-g1 = boxplot_boxplot_frame(comparison_NOR_AUS,variable="Import")
-g2 = boxplot_boxplot_frame(comparison_NOR_AUS, variable="Export")
-g3 = boxplot_boxplot_frame(comparison_NOR_AUS, variable="LC", x_lab="Period")
-
-grid.arrange(g1,g2,g3)
-
-g4 = boxplot_boxplot_frame(comparison_USA_EUR,variable="Import")
-g5 = boxplot_boxplot_frame(comparison_USA_EUR, variable="Export")
-g6 = boxplot_boxplot_frame(comparison_USA_EUR, variable="LC", x_lab="Period")
-
-grid.arrange(g4,g5,g6)
 
 #Import divided by local transmission
 boxplot_boxplot_frame_import_by_LC = function(boxplot_frame, x_lab="", ylims=c(0,0.35)) {
@@ -293,41 +294,6 @@ boxplot_boxplot_frame_Export_by_LC = function(boxplot_frame, x_lab="", ylims=c(0
     scale_color_manual(values = c("#1F85DE", "#DE781F"))+scale_y_continuous(expand = c(0, 0), limits = ylims)
   
 }
-
-
-# Import / (Import + LC)
-pdf(paste0(path_results,"Import_by_LC_NOR_AUS.pdf"), width=10, height=10)
-boxplot_boxplot_frame_import_by_LC(comparison_NOR_AUS)
-dev.off()
-
-pdf(paste0(path_results,"Import_by_LC_USA_EUR.pdf"), width=10, height=10)
-boxplot_boxplot_frame_import_by_LC(comparison_USA_EUR, ylims=c(0,0.2))
-dev.off()
-
-
-
-#Export
-pdf(paste0(path_results,"Export_by_LC_NOR_AUS.pdf"), width=10, height=10)
-boxplot_boxplot_frame_Export_by_LC(comparison_NOR_AUS)
-dev.off()
-
-pdf(paste0(path_results,"Export_by_LC_USA_EUR.pdf"), width=10, height=10)
-boxplot_boxplot_frame_Export_by_LC(comparison_USA_EUR, ylims=c(0,0.2))
-dev.off()
-
-
-utility_f1(implocexp_NOR)
-utility_f1(implocexp_AUS)
-utility_f1(implocexp_USA)
-utility_f1(implocexp_EUR)
-
-
-```
-
-```{r, include=TRUE}
-
-#Setup palette
-
 
 plot_relative_fraction = function(imp_exp_loc, time_interval = c(2000,2018)) {
     week_time = imp_exp_loc$Week_time
@@ -363,62 +329,119 @@ plot_relative_fraction = function(imp_exp_loc, time_interval = c(2000,2018)) {
   g1
 }
 
-pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/imp_exp_loc_NOR.pdf", width = 10, height = 8)
+```
+ 
+```{r, include=TRUE}
+
+ggdat1 = make_boxplot_frame_import_export_local_transmission(implocexp_NOR, location="NOR")
+ggdat2 = make_boxplot_frame_import_export_local_transmission(implocexp_AUS, location="AUS")
+comparison_NOR_AUS = rbind(ggdat1, ggdat2)
+
+ggdat1 = make_boxplot_frame_import_export_local_transmission(implocexp_USA, location="USA")
+ggdat2 = make_boxplot_frame_import_export_local_transmission(implocexp_EUR, location="EUR")
+comparison_USA_EUR = rbind(ggdat1, ggdat2)
+
+g1 = boxplot_boxplot_frame(comparison_NOR_AUS,variable="Import")
+g2 = boxplot_boxplot_frame(comparison_NOR_AUS, variable="Export")
+g3 = boxplot_boxplot_frame(comparison_NOR_AUS, variable="LC", x_lab="Period")
+
+grid.arrange(g1,g2,g3)
+
+g4 = boxplot_boxplot_frame(comparison_USA_EUR,variable="Import")
+g5 = boxplot_boxplot_frame(comparison_USA_EUR, variable="Export")
+g6 = boxplot_boxplot_frame(comparison_USA_EUR, variable="LC", x_lab="Period")
+
+grid.arrange(g4,g5,g6)
+
+# Import / (Import + LC)
+#pdf(paste0(path_results,"Import_by_LC_NOR_AUS.pdf"), width=10, height=10)
+boxplot_boxplot_frame_import_by_LC(comparison_NOR_AUS)
+#dev.off()
+
+#pdf(paste0(path_results,"Import_by_LC_USA_EUR.pdf"), width=10, height=10)
+boxplot_boxplot_frame_import_by_LC(comparison_USA_EUR, ylims=c(0,0.2))
+#dev.off()
+
+
+
+#Export
+#pdf(paste0(path_results,"Export_by_LC_NOR_AUS.pdf"), width=10, height=10)
+boxplot_boxplot_frame_Export_by_LC(comparison_NOR_AUS)
+#dev.off()
+
+#pdf(paste0(path_results,"Export_by_LC_USA_EUR.pdf"), width=10, height=10)
+boxplot_boxplot_frame_Export_by_LC(comparison_USA_EUR, ylims=c(0,0.2))
+#dev.off()
+
+# 
+# utility_f1(implocexp_NOR)
+# utility_f1(implocexp_AUS)
+# utility_f1(implocexp_USA)
+# utility_f1(implocexp_EUR)
+
+
+```
+
+```{r, include=TRUE}
+
+#pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/imp_exp_loc_NOR.pdf", width = 10, height = 8)
 plot_relative_fraction(implocexp_NOR)
-dev.off()
+#dev.off()
 
-pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/imp_exp_loc_AUS.pdf", width = 10, height = 8)
+#pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/imp_exp_loc_AUS.pdf", width = 10, height = 8)
 plot_relative_fraction(implocexp_AUS)
-dev.off()
+#dev.off()
 
-pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/imp_exp_loc_USA.pdf", width = 10, height = 8)
+#pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/imp_exp_loc_USA.pdf", width = 10, height = 8)
 plot_relative_fraction(implocexp_USA)
-dev.off()
+#dev.off()
 
 
-pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/imp_exp_loc_EUR.pdf", width = 10, height = 8)
+#pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/imp_exp_loc_EUR.pdf", width = 10, height = 8)
 plot_relative_fraction(implocexp_EUR)
-dev.off()
+#dev.off()
 
 
 ```
 
 ```{r remedy003, echo=F}
-pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_NOR.pdf", width = 10, height = 8)
+#pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_NOR.pdf", width = 10, height = 8)
 plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_NOR,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"), main_title = "Norway")
-dev.off()
+plot.new()
+#dev.off()
 
-pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_AUS.pdf", width = 10, height = 8)
+#pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_AUS.pdf", width = 10, height = 8)
 plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_AUS,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"),main_title = "Australia")
-dev.off()
+plot.new()
+#dev.off()
 
-pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_USA.pdf", width = 10, height = 8)
+#pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_USA.pdf", width = 10, height = 8)
 plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_USA,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"), main_title = "USA")
-dev.off()
+plot.new()
+#dev.off()
 
 
-pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_EUR.pdf", width = 10, height = 8)
+#pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_EUR.pdf", width = 10, height = 8)
 plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_EUR,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"), main_title = "Europe")
-dev.off()
+plot.new()
+#dev.off()
 #dev.off()
 ```
 
 ```{r remedy004, echo=F}
-plot_importation_local_without_dates(tree = tree,result_import_local_transmission = imploc_USA,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"), main_title = "USA")
-plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_USA,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"))
-plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_USA,start_time = 1750,date_breaks = 20,time_interval = c("1950-01-01","2018-01-01"), main_title="USA")
+#plot_importation_local_without_dates(tree = tree,result_import_local_transmission = imploc_USA,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"), main_title = "USA")
+#plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_USA,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"))
+#plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_USA,start_time = 1750,date_breaks = 20,time_interval = c("1950-01-01","2018-01-01"), main_title="USA")
 
 #dev.off()
 ```
 
 ```{r remedy005, echo=F}
 
-plot_importation_local_without_dates(tree = tree,result_import_local_transmission = imploc_AUS,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"), main_title = "Australia")
-plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_AUS,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"))
-
-plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_AUS,start_time = 1750,date_breaks = 20,time_interval = c("1950-01-01","2018-01-01"), main_title="AUS")
+#plot_importation_local_without_dates(tree = tree,result_import_local_transmission = imploc_AUS,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"), main_title = "Australia")
+#plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_AUS,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"))
+#plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_AUS,start_time = 1750,date_breaks = 20,time_interval = c("1950-01-01","2018-01-01"), main_title="AUS")
 #dev.off()
-
 #For testing
 # tree = tree; result_import_local_transmission = imploc_AUS ; start_time = 1750 ; date_breaks = "2 years" ; time_interval = c("2000-01-01","2018-01-01") ; main_title = "Australia"
 
