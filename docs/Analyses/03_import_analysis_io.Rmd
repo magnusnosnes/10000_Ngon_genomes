@@ -104,7 +104,7 @@ eur_tips = names(locations_NOR[which(locations_EUR=="Europe")])
 #     start_time = 1750
 #   )
 # )
-
+ 
 #save(replicates_NOR, file=paste0(path_results,"replicates_NOR.Rdata"))
 #save(replicates_AUS, file=paste0(path_results,"replicates_AUS.Rdata"))
 #save(replicates_USA, file=paste0(path_results,"replicates_USA.Rdata"))
@@ -132,14 +132,16 @@ From the mapped geographical lineage distributions we can derive the number of i
 #c3 = LineageHomology::Summarize_import_local_transmission(replicates_USA); c3
 #c3 = LineageHomology::Summarize_import_local_transmission(replicates_Europe); c3
 
+
 ```
 
 
-In Norway we estimate that there is 29% importation. This is more than twice the estimated amount in USA and Australia (each around 13%)
+
 
 ## Cumulative growth of transmission lineages
 
 The following plots show the cumulative number of sequences obtained from each estimated transmission lineage over time
+
 ```{r, include=TRUE, warning=FALSE}
 name_date_NOR = name_date[name_date$name%in%nor_tips,]
 linfo_NOR = lineage_info(Result_NOR,name_date = name_date_NOR)
@@ -162,7 +164,6 @@ LineageHomology::lineage_growth_cumulative(linfo_EUR,datelims=c("2008-07-01","20
 ```
 
 
-## Import and local transmission over time
 
 ```{r remedy001, echo=F, include=F}
 #Extract importation and local transmission on monthly basis
@@ -202,6 +203,8 @@ load(file=paste0(path_results,"impLocExp_EUR.Rdata"))
 
 ```
 
+Aggregated estimates of import, local transmission and export over the full phylogeny: 
+
 ```{r, include=TRUE}
 
 c1 = Summarize_import_export_local_transmission(implocexp_NOR); c1
@@ -210,6 +213,9 @@ c3 = Summarize_import_export_local_transmission(implocexp_USA); c3
 c3 = Summarize_import_export_local_transmission(implocexp_EUR); c3
 
 ```
+
+In Norway we estimate that around 27% of locally observed cases can be attributed due to importation events.  
+This is more than twice that estimated for the other locations (Australia, the USA, and Europe in general).
  
 ```{r, include=F}
 # Utility functions for this script.
@@ -330,8 +336,10 @@ plot_relative_fraction = function(imp_exp_loc, time_interval = c(2000,2018)) {
 }
 
 ```
- 
-```{r, include=TRUE}
+
+
+
+```{r, include=F}
 
 ggdat1 = make_boxplot_frame_import_export_local_transmission(implocexp_NOR, location="NOR")
 ggdat2 = make_boxplot_frame_import_export_local_transmission(implocexp_AUS, location="AUS")
@@ -345,14 +353,24 @@ g1 = boxplot_boxplot_frame(comparison_NOR_AUS,variable="Import")
 g2 = boxplot_boxplot_frame(comparison_NOR_AUS, variable="Export")
 g3 = boxplot_boxplot_frame(comparison_NOR_AUS, variable="LC", x_lab="Period")
 
-grid.arrange(g1,g2,g3)
-
 g4 = boxplot_boxplot_frame(comparison_USA_EUR,variable="Import")
 g5 = boxplot_boxplot_frame(comparison_USA_EUR, variable="Export")
 g6 = boxplot_boxplot_frame(comparison_USA_EUR, variable="LC", x_lab="Period")
 
+```
+ 
+## Stratifying the estimates on the periods 2010-2014, 2014-2018, and 2010-2018 (total), we obtain the following estimates
+
+```{r, echo=F,include=T, fig.width=15, fig.height=15}
+
+grid.arrange(g1,g2,g3)
 grid.arrange(g4,g5,g6)
 
+```
+ 
+By dividing importation and exportation by (import + local transmission) and (export + local transmission), respectively, we obtain the following estimates: 
+
+```{r, echo=F,include=T, fig.width=15, fig.height=15}
 # Import / (Import + LC)
 #pdf(paste0(path_results,"Import_by_LC_NOR_AUS.pdf"), width=10, height=10)
 boxplot_boxplot_frame_import_by_LC(comparison_NOR_AUS)
@@ -361,8 +379,6 @@ boxplot_boxplot_frame_import_by_LC(comparison_NOR_AUS)
 #pdf(paste0(path_results,"Import_by_LC_USA_EUR.pdf"), width=10, height=10)
 boxplot_boxplot_frame_import_by_LC(comparison_USA_EUR, ylims=c(0,0.2))
 #dev.off()
-
-
 
 #Export
 #pdf(paste0(path_results,"Export_by_LC_NOR_AUS.pdf"), width=10, height=10)
@@ -381,6 +397,8 @@ boxplot_boxplot_frame_Export_by_LC(comparison_USA_EUR, ylims=c(0,0.2))
 
 
 ```
+
+The fraction of total events that are imports, exports and local transmissions in the period 2000-2018 are visualized below. 
 
 ```{r, include=TRUE}
 
@@ -403,6 +421,8 @@ plot_relative_fraction(implocexp_EUR)
 
 
 ```
+
+The absolute estimates on the same periods are shown below. 
 
 ```{r remedy003, echo=F}
 #pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_NOR.pdf", width = 10, height = 8)
