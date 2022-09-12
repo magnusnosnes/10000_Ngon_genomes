@@ -35,6 +35,26 @@ path_main = "~/Dropbox/10000_Lovers/Phylogeography"
 path_data = "~/Dropbox/10000_Lovers/01_LineageHomology/11_saved_data/"
 path_results = "~/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/"
 
+#define naming function
+#Didnt work as intended becasue variables were saved with the name variable and loaded into that same name - find a fix in the future. 
+# name_data = function(name){
+#   paste0(path_data,name)
+# }
+# #Defining save function
+# #Defaults to variable_name.Rdata
+# save_data = function(variable) {
+#   
+#   save(eval(parse(text = model_name)), file=name_data(paste0(deparse(substitute(variable)),".Rdata")))
+# }
+# 
+# load_data = function(variable) {
+#   print(paste0(deparse(substitute(variable)),".Rdata"))
+#   load(file=name_data(paste0(deparse(substitute(variable)),".Rdata")),envir =.GlobalEnv)
+# }
+# save_data(variable)
+
+
+
 source("~/Dropbox/10000_Lovers/01_LineageHomology/sourcefunctions/environment_variables_without_absolute_paths.R")
 
 ```
@@ -97,6 +117,8 @@ First we look at the distribution of mosaic  variants of  the genes mtr and penA
 ```{r,include=F}
 #Define skygrowth with shifted time
 source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/Custom_skygrowth_plot.R")
+
+
 ```
 
 
@@ -318,11 +340,20 @@ penA_highMic_nonMosaic = extract.clade(tree, node=12427); penA_highMic_nonMosaic
 
 #Run skygrowth on the clades
 skyMtr = skygrowth.map(mtr_clade); 
+#save(skyMtr,file = paste0(path_data, "skyMtr.Rdata"))
+#load(file=paste0(path_data, "skyMtr.Rdata"))
 skyhighMic_mosaic = skygrowth.map(penA_highMic_mosaic)
+#save(skyhighMic_mosaic,file = paste0(path_data, "skyhighMic_mosaic.Rdata"))
+#load(file=paste0(path_data, "skyhighMic_mosaic.Rdata"))
 skyhighMic_mosaic2 = skygrowth.map(penA_highMic_mosaic2)
+#save(skyhighMic_mosaic2, file = paste0(path_data, "skyhighMic_mosaic2.Rdata"))
+#load(file=paste0(path_data, "skyhighMic_mosaic2.Rdata"))
 skyhighMic_nonMosaic = skygrowth.map(penA_highMic_nonMosaic)
+#save(skyhighMic_nonMosaic,file = paste0(path_data, "skyhighMic_nonMosaic.Rdata"))
+#load(file=paste0(path_data, "skyhighMic_nonMosaic.Rdata"))
 skyFullTree = skygrowth.map(tree)
-
+#save(skyFullTree, file = paste0(path_data, "skyFullTree.Rdata"))
+#load(file = paste0(path_data, "skyFullTree.Rdata"))
 ```
 
 ```{r, echo=F, include=T, fig.height=10, fig.width=10, warning=F}
@@ -336,19 +367,8 @@ penADates3 = dates[,2][unlist(lapply(penA_highMic_nonMosaic$tip.label, FUN = fun
 #date_decimal(max(mtrDates)); date_decimal(max(penADates1));  date_decimal(max(penADates2)); date_decimal(max(penADates3));
 
 #Plot skygrowth results
-g1 = ggtree(mtr_clade,mrsd="2019-07-26")+theme_tree2()+scale_x_continuous(expand=c(0,0),breaks=seq(1980,2020,10))+theme_bw()+ylab("Tree position")+ theme(axis.ticks.y = element_blank())
-
-g2 = ggtree(penA_highMic_mosaic,mrsd="2019-01-06")+theme_tree2()+scale_x_continuous(expand=c(0,0),breaks=seq(1960,2020,10))+theme_bw()+ylab("Tree position")
-
-g3 = custom_skygrowth_plot(skyMtr,shift_time=1978.394, logy=F)+ggtitle("Mosaic mtr",)+scale_x_continuous(expand=c(0,0),breaks=seq(1980,2020,10))+
-  theme(plot.title = element_text(hjust = 0.5))
-
-g4 = custom_skygrowth_plot(skyhighMic_mosaic, shift_time=1958.606, logy=F)+ggtitle("High MIC mosaic penA")+scale_x_continuous(expand=c(0,0),breaks=seq(1960,2020,20))+
-  theme(plot.title = element_text(hjust = 0.5))
-
-
-grid.arrange(g1,g2,g3,g4,ncol=2)
-
+source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/subtree_plots.R")
+subtree_plots1(color1="#E69F00", color2="#56B4E9", mtr_clade = mtr_clade,penA_highMic_mosaic = penA_highMic_mosaic, skyMtr = skyMtr, skyhighMic_mosaic =  skyhighMic_mosaic)
 
 
 ```
@@ -356,19 +376,8 @@ grid.arrange(g1,g2,g3,g4,ncol=2)
 ## TBD
  
 ```{r, echo=F, include=T, fig.height=10, fig.width=10, warning=F}
-g5 = ggtree(penA_highMic_mosaic2,mrsd="2018-11-02")+theme_tree2()+scale_x_continuous(expand=c(0,0),breaks=seq(1970,2020,10))+theme_bw()+ylab("Tree position")+ theme(axis.ticks.y = element_blank())
 
-g6 = ggtree(penA_highMic_nonMosaic,mrsd="2019-07-20")+theme_tree2()+scale_x_continuous(expand=c(0,0),breaks=seq(1940,2020,20))+theme_bw()+ylab("Tree position")+theme(axis.ticks.y = element_blank())
-
-g7 = custom_skygrowth_plot(skyhighMic_mosaic2, shift_time=1976.498, logy=F)+scale_x_continuous(expand=c(0,0),breaks=seq(1980,2020,10))+ggtitle("High MIC mosaic penA other clade")+
-  theme(plot.title = element_text(hjust = 0.5))
-
-g8 = custom_skygrowth_plot(skyhighMic_nonMosaic, shift_time=1940.751, logy=F)+ggtitle("High MIC non-mosaic penA")+scale_x_continuous(expand=c(0,0),breaks=seq(1940,2020,20))+theme_bw()+
-  theme(plot.title = element_text(hjust = 0.5))
-
-
-grid.arrange(g5,g6,g7,g8,ncol=2)
-
+subtree_plots2(color1="#009E73", color2="#CC79A7",penA_highMic_mosaic2 = penA_highMic_mosaic2,penA_highMic_nonMosaic = penA_highMic_nonMosaic,skyhighMic_mosaic2 = skyhighMic_mosaic2,skyhighMic_nonMosaic = skyhighMic_nonMosaic)
 
 ```
 
@@ -379,11 +388,10 @@ The effective population size in the tree as a whole is shown below. The clades 
 g5 = custom_skygrowth_plot(skyFullTree, shift_time=1750, logy=F)+ggtitle("Full Tree")+
   theme(plot.title = element_text(hjust = 0.5))+scale_y_continuous(limits=c(0,20000), oob=rescale_none)+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))
 
-g6 = ggtree(tree,mrsd="2019-08-01")+theme_tree2()+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))+theme_bw()+ylab("Tree position")+theme(axis.ticks.y = element_blank())+geom_highlight(node=9778,fill="green")+geom_highlight(node=9778,col="lightgreen")+
-  geom_highlight(node=13077,fill="steelblue")+
-  geom_highlight(node=12872,fill="yellow")+
-  geom_highlight(node=12427,fill="red")
-
+#g6 = ggtree(tree,mrsd="2019-08-01")+theme_tree2()+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))+theme_bw()+ylab("Tree position")+theme(axis.ticks.y = element_blank())+geom_highlight(node=9778,fill="green")
+g6 = groupClade(tree, c(9778,13077,12872,12427))
+color_mapping_tree = c("0"="#000000","1"="#E69F00" , "2"="#56B4E9", "3" = "#009E73" , "4" = "#CC79A7")
+g6 = ggtree(g6, mrsd = "2019-08-01",aes(color=group))+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))+scale_color_manual("Clade",values=color_mapping_tree)
 grid.arrange(g6,g5,ncol=1)
 ```
 
@@ -414,8 +422,8 @@ From 1810-2010 the effective population size have been steadily growing, with a 
 
 #Figure 1: panel B:
 #pdf(paste0(path_results,"/02_Figure_2/skygrowth_full_tree.pdf"), width=10,height=7) 
-custom_skygrowth_plot(skyFullTree, shift_time=1750, logy=F, fill_color = "black")+ggtitle("Full Tree")+
-  theme(plot.title = element_text(hjust = 0.5))+scale_y_continuous(limits=c(0,20000), oob=rescale_none)+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))
+# custom_skygrowth_plot(skyFullTree, shift_time=1750, logy=F, fill_color = "black")+ggtitle("Full Tree")+
+#   theme(plot.title = element_text(hjust = 0.5))+scale_y_continuous(limits=c(0,20000), oob=rescale_none)+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))
 #dev.off()
 #Plot skygrowth results
 #source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/subtree_plots.R")
