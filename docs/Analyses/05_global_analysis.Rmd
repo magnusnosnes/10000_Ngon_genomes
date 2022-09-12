@@ -109,16 +109,14 @@ length(tree$tip.label); length(remainder_tree$tip.label); length(mtrSubtree$tip.
 
 ```
 
-# Global metadata effective population size analysis
+# Metadata and effective population size analysis
 
-we want to describe large clades that differ in some metadata with respect to the rest of the tree. 
-First we look at the distribution of mosaic  variants of  the genes mtr and penA, minimum inhibitory concentration (MIC) (categorised into levels high and low) levels,  and  sex  distribution, 
+Here we describe large clades that differ in some metadata with respect to the rest of the tree clades of the tree. 
+Specifically we investigate clades that differ wrt. the variants of the mosaic variants of the genes mtr and penA, minimum inhibitory concentration (MIC) (categorized into levels high and low) levels,  and  sex  distribution, 
 
 ```{r,include=F}
 #Define skygrowth with shifted time
 source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/Custom_skygrowth_plot.R")
-
-
 ```
 
 
@@ -288,11 +286,11 @@ p3=  p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col,
 
 ```
 
-### Tree with metadata
+### Full tree with metadata
 
-The fully annotated tree shows that most of the mosaic variant of mtr clusters in distict part of the tree. 
-High HIC categories also clusters in some sections of the tree. 
-The sex distribution does not have major evident clusters when we look at the tree as a whole, but in smaller sections of the tree.
+The annotated tree shows that most of the mosaic variant of mtr cluster in distict parts of the tree. 
+Variants of penA that are related to high MIC also make up distinct clusters. 
+The distribution of sex (M/F) does not display any obvious large scale patterns, but when zooming in on smaller cluseters (< 50 isolates) there are many clades that display higher fractions of females F/(F+M).
 
 
 ```{r, include=T, echo=F,  warning=F,fig.height=15, fig.width=15}
@@ -302,6 +300,7 @@ The sex distribution does not have major evident clusters when we look at the tr
 source("~/Dropbox/Github/10000_Ngon_genomes/invis_project_functions/Annotation_w_settings.R")
 p2 = annotate(tree,extra_dat = metaDataTimeTree,size=0.2)
 p2
+
 ```
 
 ## An interactive version of the plot can be explored below
@@ -317,7 +316,7 @@ ggplotly(p3) %>% layout(legend=list(x=0,
 
 ### Clades
 
-The pictures below shows subtrees (see interactive plot) we deem important and for which we will estimate the effective population size dynamics.
+The pictures below shows clades (see interactive plot) we deem important based on and for which we will estimate the effective population size dynamics.
 
 MTR clusters in the upper part of the tree under node 11506. The estimated time of the most recent common ancestor (TMRCA) of this clade is around 1978.
 
@@ -376,7 +375,6 @@ subtree_plots1(color1="#E69F00", color2="#56B4E9", mtr_clade = mtr_clade,penA_hi
 ## TBD
  
 ```{r, echo=F, include=T, fig.height=10, fig.width=10, warning=F}
-
 subtree_plots2(color1="#009E73", color2="#CC79A7",penA_highMic_mosaic2 = penA_highMic_mosaic2,penA_highMic_nonMosaic = penA_highMic_nonMosaic,skyhighMic_mosaic2 = skyhighMic_mosaic2,skyhighMic_nonMosaic = skyhighMic_nonMosaic)
 
 ```
@@ -391,12 +389,11 @@ g5 = custom_skygrowth_plot(skyFullTree, shift_time=1750, logy=F)+ggtitle("Full T
 #g6 = ggtree(tree,mrsd="2019-08-01")+theme_tree2()+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))+theme_bw()+ylab("Tree position")+theme(axis.ticks.y = element_blank())+geom_highlight(node=9778,fill="green")
 g6 = groupClade(tree, c(9778,13077,12872,12427))
 color_mapping_tree = c("0"="#000000","1"="#E69F00" , "2"="#56B4E9", "3" = "#009E73" , "4" = "#CC79A7")
-g6 = ggtree(g6, mrsd = "2019-08-01",aes(color=group))+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))+scale_color_manual("Clade",values=color_mapping_tree)
+g6 = ggtree(g6, mrsd = "2019-08-01",aes(color=group))+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))+scale_color_manual("Clade",values=color_mapping_tree)+theme(legend.position="none")
 grid.arrange(g6,g5,ncol=1)
 ```
 
-The high effective population size from 1770-1800 is a result of the long basal branches which probably displays a lack of sequences that represent the divergence that happened in this time period. 
-From 1810-2010 the effective population size have been steadily growing, with a pronounced decrease since 2010.
+The high effective population (with very high uncertainty from the confidence intervals) size from 1770-1800 is a result of the long basal branches which probably displays a lack of sequences that represent the divergence that happened in this time period. From 1810-2010 the effective population size have been steadily growing, with a pronounced decrease since 2010.
 
 ```{r,  include=F, echo=F, warning=F, fig.height=10, fig.width=10}
 
