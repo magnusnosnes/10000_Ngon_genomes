@@ -36,7 +36,8 @@ path_results = "~/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/"
 path_final_figures = "~/Dropbox/10000_Lovers/01_LineageHomology/99_Figures_for_paper/"
 
 source("~/Dropbox/10000_Lovers/01_LineageHomology/sourcefunctions/environment_variables.R")
-
+load(file=paste0(path_data,"Result_EUR.Rdata"))
+Result_EUR=LineageHomology::reorder_LH(Result_EUR)
 #RQ: Does meta-data explain the growth-rate of the biggest clades in period 2015-2018?
 #1: Run Skygrowth on each TL.
 #2: Extract clade wise growth-rate.
@@ -110,6 +111,19 @@ load(file=paste0(path_results,"neg_NOR.Rdata"))
 # skygrowth_multiplot(neg_sizes_NOR,root_date=1750, time_shift_list=cluster_times_NOR$time_shifts,xlimits=NA, logy=F)
 # dev.off()
 
+
+#Results for AUSTRALIA
+cluster_times_AUS = clusters_and_times(Result_AUS, main_tree = tree)
+#neg_sizes_AUS = neg_sizes(cluster_times_AUS)
+#save(neg_sizes_AUS,file=paste0(path_results,"neg_AUS.Rdata"))
+load(file=paste0(path_results,"neg_AUS.Rdata"))
+# pdf(paste0(path_results,"neg_AUS_top20.pdf"),width=15,height=15)
+# skygrowth_multiplot(neg_sizes_AUS,root_date=1750, time_shift_list=cluster_times_AUS$time_shifts,xlimits=2010, logy=F)
+# dev.off()
+# pdf(paste0(path_results,"neg_AUS_top20_full_timeline.pdf"),width=15,height=15)
+# skygrowth_multiplot(neg_sizes_AUS,root_date=1750, time_shift_list=cluster_times_AUS$time_shifts,xlimits=NA, logy=F)
+# dev.off()
+
 #Results for USA
 cluster_times_USA = clusters_and_times(Result_USA, main_tree = tree)
 #neg_sizes_USA = neg_sizes(cluster_times_USA)
@@ -122,16 +136,16 @@ load(file=paste0(path_results,"neg_USA.Rdata"))
 # skygrowth_multiplot(neg_sizes_USA,root_date=1750, time_shift_list=cluster_times_USA$time_shifts,xlimits=NA, logy=F)
 # dev.off()
 
-#Results for AUSTRALIA
-cluster_times_AUS = clusters_and_times(Result_AUS, main_tree = tree)
-#neg_sizes_AUS = neg_sizes(cluster_times_AUS)
-#save(neg_sizes_AUS,file=paste0(path_results,"neg_AUS.Rdata"))
-load(file=paste0(path_results,"neg_AUS.Rdata"))
-# pdf(paste0(path_results,"neg_AUS_top20.pdf"),width=15,height=15)
-# skygrowth_multiplot(neg_sizes_AUS,root_date=1750, time_shift_list=cluster_times_AUS$time_shifts,xlimits=2010, logy=F)
+#Results for Europe
+cluster_times_EUR = clusters_and_times(Result_EUR, main_tree = tree)
+#neg_sizes_EUR = neg_sizes(cluster_times_EUR)
+#save(neg_sizes_EUR,file=paste0(path_results,"neg_EUR.Rdata"))
+load(file=paste0(path_results,"neg_EUR.Rdata"))
+# pdf(paste0(path_results,"neg_USA_top20.pdf"),width=15,height=15)
+#skygrowth_multiplot(neg_sizes_EUR,root_date=1750, time_shift_list=cluster_times_EUR$time_shifts,xlimits=2010, logy=F)
 # dev.off()
-# pdf(paste0(path_results,"neg_AUS_top20_full_timeline.pdf"),width=15,height=15)
-# skygrowth_multiplot(neg_sizes_AUS,root_date=1750, time_shift_list=cluster_times_AUS$time_shifts,xlimits=NA, logy=F)
+# pdf(paste0(path_results,"neg_USA_top20_full_timeline.pdf"),width=15,height=15)
+# skygrowth_multiplot(neg_sizes_USA,root_date=1750, time_shift_list=cluster_times_USA$time_shifts,xlimits=NA, logy=F)
 # dev.off()
 
 #Notes: Sampling is different between the locations
@@ -160,7 +174,8 @@ return_growth_interval=function(clusterwise_output, period=c(2010,2017), shift_t
 r_NOR = return_growth_interval(clusterwise_output=neg_sizes_NOR, time_shift_list=cluster_times_NOR)
 r_AUS = return_growth_interval(clusterwise_output=neg_sizes_AUS, time_shift_list=cluster_times_AUS)
 r_USA = return_growth_interval(clusterwise_output=neg_sizes_USA, time_shift_list=cluster_times_USA)
-r_all = c(r_NOR,r_AUS,r_USA)
+r_EUR = return_growth_interval(clusterwise_output=neg_sizes_EUR, time_shift_list=cluster_times_EUR)
+r_all = c(r_NOR,r_AUS,r_USA,r_EUR)
 
 define_explanatory_variables = function(result, larger_than) {
   #Sex distribution
@@ -202,11 +217,11 @@ define_explanatory_variables = function(result, larger_than) {
 d1 = define_explanatory_variables(Result_NOR,larger_than=10)
 d2 = define_explanatory_variables(Result_AUS,larger_than=10)
 d3 = define_explanatory_variables(Result_USA,larger_than=10)
-
+d4 = define_explanatory_variables(Result_EUR,larger_than=10)
 
 #Gather data
-total_data = rbind(d1,d2,d3)
-locations = c(rep("Norway",length(r_NOR)),rep("Australia",length(r_AUS)),rep("USA",length(r_USA)))
+total_data = rbind(d1,d2,d3,d4)
+locations = c(rep("Norway",length(r_NOR)),rep("Australia",length(r_AUS)),rep("USA",length(r_USA)), rep("EUR",length(r_EUR)))
 total_data = cbind(r_all,locations,total_data) #Add growth rate
 colnames(total_data)= c("GrowthRate","locations", "tlSize","penA","mtr", "sexDistribution") 
 
@@ -229,7 +244,7 @@ The input for the following analyses are all the transmission lineages containin
 noquote("Size of transmission lineages containing more than 10 sequences:")
 Result_NOR$Lineage_sizes[Result_NOR$Lineage_sizes>10]
 noquote("Number of transmission containing more than 10 sequences:")
-length(Result_NOR$Halfedge_over_tmrca[Result_NOR$Lineage_sizes>10])
+length(Result_NOR$Lineage_sizes[Result_NOR$Lineage_sizes>10])
 
 ``` 
 
@@ -259,13 +274,13 @@ Similarly, for Australia and USA we find:
 noquote("Size of transmission lineages containing more than 10 sequences:")
 Result_AUS$Lineage_sizes[Result_AUS$Lineage_sizes>10]
 noquote("Number of transmission containing more than 10 sequences:")
-length(Result_AUS$Halfedge_over_tmrca[Result_AUS$Lineage_sizes>10])
+length(Result_AUS$Lineage_sizes[Result_AUS$Lineage_sizes>10])
 
 noquote("Estimated arrival time in Australia")
 Result_AUS$Halfedge_over_tmrca[Result_AUS$Lineage_sizes>10]
 
 noquote("Average growth rate in 2010-2017:")
-r_NOR
+r_AUS
 ```
 
 ### Transmission lineages in USA
@@ -274,16 +289,31 @@ r_NOR
 noquote("Size of transmission lineages containing more than 10 sequences:")
 Result_USA$Lineage_sizes[Result_USA$Lineage_sizes>10]
 noquote("Number of transmission containing more than 10 sequences:")
-length(Result_USA$Halfedge_over_tmrca[Result_USA$Lineage_sizes>10])
+length(Result_USA$Lineage_sizes[Result_USA$Lineage_sizes>10])
 
 noquote("Estimated arrival time in USA")
 Result_USA$Halfedge_over_tmrca[Result_USA$Lineage_sizes>10]
 
 noquote("Average growth rate in 2010-2017:")
-r_NOR
+r_USA
 
 ``` 
 
+### Transmission lineages in Europe
+
+```{r, echo=FALSE}
+noquote("Size of transmission lineages containing more than 10 sequences:")
+Result_EUR$Lineage_sizes[Result_EUR$Lineage_sizes>10]
+noquote("Number of transmission containing more than 10 sequences:")
+length(Result_EUR$Lineage_sizes[Result_EUR$Lineage_sizes>10])
+
+noquote("Estimated arrival time in Europe")
+Result_EUR$Halfedge_over_tmrca[Result_EUR$Lineage_sizes>10]
+
+noquote("Average growth rate in 2010-2017:")
+r_EUR
+
+``` 
 ## Metadata
 
 To study the relation of the growth rates to metadata we collect the growth rates in a data frame along with variables that describe the sex distribution, penA status and mtrD status for each transmission lineage.
@@ -397,9 +427,9 @@ g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=GrowthRate,co
 g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=GrowthRate))+ylab("Growth rate")
 g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=GrowthRate))+ylab("Growth rate")
 
-svglite(file=paste0(path_final_figures,"GrowthRates_on_metadata.svg"))
+#svglite(file=paste0(path_final_figures,"GrowthRates_on_metadata.svg"))
 grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
-dev.off()
+#dev.off()
 
 
 g1 = ggplot(total_data,aes(x=sexDistribution, y=tlSize, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Transmission lineage size")+theme(legend.position="none")
@@ -407,7 +437,7 @@ g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=tlSize,color=
 g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=tlSize))+ylab("Transmission lineage size")
 g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=tlSize))+ylab("Transmission lineage size")
 
-svglite(file=paste0(path_final_figures,"TLSize_on_metadata.svg"))
+#svglite(file=paste0(path_final_figures,"TLSize_on_metadata.svg"))
 grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
-dev.off()
+#dev.off()
 ```
