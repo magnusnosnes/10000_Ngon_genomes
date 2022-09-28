@@ -232,9 +232,9 @@ colnames(total_data)= c("GrowthRate","locations", "tlSize","penA","mtr", "sexDis
 
 ```
 
-## Analysis of the growth rate of the largest Tranmission lineages and their relation to explanatory variables.
+## Analysis of the growth rate of the largest tranmission lineages and their relation to explanatory variables.
 
-##### Research question: Is the growth and size of transmission lineages in the time period 2010-2017 dependent on any of the explanatory variables: Sex distribution in the clade, mtD status, penA status, or final lineage size (transmissin lineage size)?.
+##### Research question: Is the growth and size of transmission lineages in the time period 2010-2017 dependent on any of the explanatory variables: Sex distribution in the clade, mtrD status, penA status, or final lineage size (transmissin lineage size)?.
 
 The input for the following analyses are all the transmission lineages containing more than 10 sequences from each location: (Norway, Australia, USA). For each of the transmission lineages we run [skygrowth v.0.3.1](https://github.com/mrc-ide/skygrowth) on the clades, and extract the growth rate of the effective population size in the time interval 2010-2017
 
@@ -369,33 +369,6 @@ total_data_modified$mtr[total_data_modified$mtr!="non-mosaic"]="mosaic"
 total_data_modified$mtr[total_data_modified$mtr=="semi-mosaic"]="mosaic"
 ```
 
-Linear regression of the lineage size and growth rate on the explanatory variables
-*Note.The model fit is poor, should probably use GLM instead.*
-
-```{r, echo=FALSE, include = T}
-#Testing regression models
-mod_lineage_size = lm(tlSize~penA+mtr+sexDistribution+locations, data = total_data)
-summary(mod_lineage_size)
-
-mod_growthRate = lm(GrowthRate~penA+mtr+sexDistribution+locations, data = total_data)
-summary(mod_growthRate)
-
-
-```
-
-Collapsing the categories into two levels: Mosaic and non mosaic we have the data
-
-```{r, echo=FALSE, include = T}
-mod_lineage_size = lm(tlSize~penA+mtr+sexDistribution+locations, data = total_data_modified)
-summary(mod_lineage_size)
-
-mod_growthRate = lm(GrowthRate~penA+mtr+sexDistribution+locations, data = total_data_modified)
-summary(mod_growthRate)
-
-
-
-```
-
 Doing the analyses individually for Norway/Australia, and Europe/USA. 
 For the regression analyses we first consider epifactors alone: location and sex distribution (fraction M/(M+F)) and the interaction of these.
 We perform the comparisons for Norway versus Australia and Europe versus the USA - since these geographical regions are of more similar sizes.
@@ -412,7 +385,9 @@ total_data_large_scale = total_data_modified[which(total_data_modified[,"locatio
 
 
 ```
-#1. Epifactors alone
+
+# 1. Epifactors alone
+
 ```{r, echo=FALSE, include = T}
 #Lineage size and growth on location
 mod_lineage_size = lm(log(tlSize)~locations, data = total_data_small_scale)
@@ -450,7 +425,7 @@ coefplot(mod_lineage_size)+theme_bw()
 
 ```
 
-#2. Epifactors with interaction terms
+# 2. Epifactors with interaction terms
 
 ```{r, echo=FALSE, include = T}
 #Lineage size and growth rate on epifactors
