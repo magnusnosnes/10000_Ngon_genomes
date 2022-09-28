@@ -24,6 +24,7 @@ library(scales) #Make more axis ticks.
 library(gridExtra)
 library(ggplot2)
 library(phylodyn)
+library(coefplot)
 
 #Notes:
 #Had to install an older version of RcppArmadillo to get the script running
@@ -379,6 +380,7 @@ summary(mod_lineage_size)
 mod_growthRate = lm(GrowthRate~penA+mtr+sexDistribution+locations, data = total_data)
 summary(mod_growthRate)
 
+
 ```
 
 Collapsing the categories into two levels: Mosaic and non mosaic we have the data
@@ -390,13 +392,125 @@ summary(mod_lineage_size)
 mod_growthRate = lm(GrowthRate~penA+mtr+sexDistribution+locations, data = total_data_modified)
 summary(mod_growthRate)
 
+
+
+```
+
+Doing the analyses individually for Norway/Australia, and Europe/USA. 
+For the regression analyses we first consider epifactors alone: location and sex distribution (fraction M/(M+F)) and the interaction of these.
+We perform the comparisons for Norway versus Australia and Europe versus the USA - since these geographical regions are of more similar sizes.
+We run the regressions with 1. both factors included 2. one regression for each factor alone. 
+
+Next we look at the effects of mtr and penA variants. Since we believe location and sexDistribution to be important, we keep these in the model and their interaction
+
+
+```{r, echo=FALSE, include = T}
+#Pairwise comparisons between Norway and Australia and Europe and USA
+total_data_modified = total_data_modified[complete.cases(total_data_modified),]
+total_data_small_scale = total_data_modified[which(total_data_modified[,"locations"] %in% c("Norway", "Australia")),]
+total_data_large_scale = total_data_modified[which(total_data_modified[,"locations"] %in% c("EUR", "USA")),]
+
+
+```
+#1. Epifactors alone
+```{r, echo=FALSE, include = T}
+#Lineage size and growth on location
+mod_lineage_size = lm(log(tlSize)~locations, data = total_data_small_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+mod_lineage_size = lm(GrowthRate~locations, data = total_data_small_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+mod_lineage_size = lm(log(tlSize)~sexDistribution, data = total_data_small_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+mod_lineage_size = lm(GrowthRate~sexDistribution, data = total_data_small_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+
+mod_lineage_size = lm(log(tlSize)~locations, data = total_data_large_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+mod_lineage_size = lm(GrowthRate~locations, data = total_data_large_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+mod_lineage_size = lm(log(tlSize)~sexDistribution, data = total_data_large_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+mod_lineage_size = lm(GrowthRate~sexDistribution, data = total_data_large_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+```
+
+#2. Epifactors with interaction terms
+
+```{r, echo=FALSE, include = T}
+#Lineage size and growth rate on epifactors
+mod_lineage_size = lm(log(tlSize)~sexDistribution+locations+sexDistribution*locations, data = total_data_small_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+mod_lineage_size = lm(log(tlSize)~sexDistribution+locations+sexDistribution*locations, data = total_data_large_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+
+mod_lineage_size = lm(GrowthRate~sexDistribution+locations+sexDistribution*locations, data = total_data_small_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+mod_lineage_size = lm(GrowthRate~sexDistribution+locations+sexDistribution*locations, data = total_data_large_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+
+```
+ 
+ 
+ 
+```{r, echo=FALSE, include = T}
+#Lineage size and growth on sex
+
+#With mtr and penA etc. 
+
+mod_lineage_size = lm(log(tlSize)~penA+mtr+sexDistribution+locations+sexDistribution:locations, data = total_data_small_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+mod_growthRate = lm(log(GrowthRate)~penA+mtr+sexDistribution+locations+sexDistribution:locations, data = total_data_small_scale)
+summary(mod_growthRate)
+coefplot(mod_growthRate)+theme_bw()
+
+#Europe USA
+mod_lineage_size = lm(log(tlSize)~penA+mtr+sexDistribution+locations+sexDistribution:locations, data = total_data_large_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+
+mod_growthRate = lm(log(GrowthRate)~-1+penA+mtr+sexDistribution+locations+sexDistribution:locations, data = total_data_large_scale)
+summary(mod_growthRate)
+coefplot(mod_growthRate)+theme_bw()
+
+
+mod_lineage_size = lm(log(tlSize)~sexDistribution+locations+sexDistribution:locations,data = total_data_large_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
 ```
 
 
 ```{r, echo=FALSE, include = F}
+
 mod_total = lm(r_all~factor(penA)+factor(mtr)+sexDistribution, data = total_data); summary(mod_total)
 
-mod_total = lm(r_all~factor(penA)+factor(mtr)+sexDistribution, data = total_data_modified); summary(mod_total)
 
 #plot(mod_total)
 
@@ -411,8 +525,7 @@ summary(mod1);
 summary(mod2);
 summary(mod3)
 
-
-#Use functions from the app script to extract explanatory variables. 
+#Use functions from the app script to extract explanatory variables.
 # mtrD(Result,larger_than = input$largerthan)
 # t1 = sex_distributions(Result,larger_than = input$largerthan)
 # penA_mosaic_distribution(Result,larger_than = input$largerthan)
@@ -433,11 +546,12 @@ grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
 
 
 g1 = ggplot(total_data,aes(x=sexDistribution, y=tlSize, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Transmission lineage size")+theme(legend.position="none")
-g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=tlSize,color=locations))+theme(legend.position = "none")+ylab("Transmission lineage size")
-g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=tlSize))+ylab("Transmission lineage size")
-g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=tlSize))+ylab("Transmission lineage size")
+g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=tlSize,color=locations))+theme(legend.position = "none")+ylab("Transmission lineage size")+scale_y_log10()
+g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=tlSize))+ylab("Transmission lineage size")+scale_y_log10()
+g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=tlSize))+ylab("Transmission lineage size")+scale_y_log10()
 
 #svglite(file=paste0(path_final_figures,"TLSize_on_metadata.svg"))
 grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
 #dev.off()
+
 ```

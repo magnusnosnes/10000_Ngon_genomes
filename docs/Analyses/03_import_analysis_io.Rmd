@@ -42,6 +42,8 @@ source("~/Dropbox/10000_Lovers/01_LineageHomology/sourcefunctions/environment_va
 
 The input for this analysis is the results from the maximum likelihood mapping of the geographical states on the full phylogenetic tree of the 9732 genomes. 
 
+
+ 
 ```{r, include=FALSE}
 #Load maximum likelihood mappings.
 load(file=paste0(path_data,"Result_USA.Rdata"))
@@ -124,18 +126,29 @@ load(file=paste0(path_results,"replicates_EUR.Rdata"))
 
 From the mapped geographical lineage distributions we can derive the number of importation and local transmission events for each location (based on the available sequences). NB. we do not account for unobserved infections (sequences), and hence the estimated number only reflects the fraction of *sequenced* genomes that is assigned to specific lineages. The relative growth between the lineages (growth of an transmission lineage implies local transmission), is an important quantity and tells us how dominant specific lineages have become over time. This too could be affected by nonrandom sampling such as targeted sampling of lineages with anitibiotic resistance. 
 
-
-
 ```{r, include=FALSE}
-#c1 = LineageHomology::Summarize_import_local_transmission(replicates_NOR); c1
-#c2 = LineageHomology::Summarize_import_local_transmission(replicates_AUS); c2
-#c3 = LineageHomology::Summarize_import_local_transmission(replicates_USA); c3
-#c3 = LineageHomology::Summarize_import_local_transmission(replicates_Europe); c3
+#Debug section: 
+replicates_NOR = pbreplicate(
+  2,
+  LineageHomology_w_uncertainty_v2(
+    tree=tree,
+    ace_nodes=ace_NOR$lik.anc,
+    ace_tips = to.matrix(locations_NOR, seq=c("Norway", "ROW")),
+    start_time = 1750
+  )
+)
+
+implocexp_NOR = import_export_local_transmission(tree,replicates_NOR[,1:2],start_time=1750,time_interval_size = 1, focal_location = "Norway")
+Summarize_import_export_local_transmission(implocexp_NOR)
+
+length(replicates_NOR[,1]$Lineage_sizes[which(replicates_NOR[,1]$lineage_state==1)]) #508 imports here.
+length(replicates_NOR[,1]$unobserved_tl_halfedge_above_mrca)
+sum(replicates_NOR[,1]$unobserved_tl_states==1) #227 imports here.
+#In total we therefore have 508+227 = 735 imports, of which 227 is unobserved.
+
 
 
 ```
-
-
 
 
 ## Cumulative growth of transmission lineages
@@ -214,7 +227,7 @@ c3 = Summarize_import_export_local_transmission(implocexp_EUR); c3
 
 ```
 
-In Norway we estimate that around 27% of locally observed cases can be attributed due to importation events.  
+In Norway we estimate that around 42% of locally observed cases can be attributed due to importation events.  
 This is more than twice that estimated for the other locations (Australia, the USA, and Europe in general).
  
 ```{r, include=F}
