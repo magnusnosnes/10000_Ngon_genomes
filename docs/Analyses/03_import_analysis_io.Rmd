@@ -13,6 +13,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, collapse=T, cache=T, 'styler', tidy.opts=list(strict=T))
 ```
 
@@ -134,22 +135,22 @@ From the mapped geographical lineage distributions we can derive the number of i
 
 ```{r, include=FALSE}
 #Debug section: 
-replicates_NOR = pbreplicate(
-  2,
-  LineageHomology_w_uncertainty_v2(
-    tree=tree,
-    ace_nodes=ace_NOR$lik.anc,
-    ace_tips = to.matrix(locations_NOR, seq=c("Norway", "ROW")),
-    start_time = 1750
-  )
-)
-
-implocexp_NOR = import_export_local_transmission(tree,replicates_NOR[,1:2],start_time=1750,time_interval_size = 1, focal_location = "Norway")
-Summarize_import_export_local_transmission(implocexp_NOR)
-
-length(replicates_NOR[,1]$Lineage_sizes[which(replicates_NOR[,1]$lineage_state==1)]) #508 imports here.
-length(replicates_NOR[,1]$unobserved_tl_halfedge_above_mrca)
-sum(replicates_NOR[,1]$unobserved_tl_states==1) #227 imports here.
+# replicates_NOR = pbreplicate(
+#   2,
+#   LineageHomology_w_uncertainty_v2(
+#     tree=tree,
+#     ace_nodes=ace_NOR$lik.anc,
+#     ace_tips = to.matrix(locations_NOR, seq=c("Norway", "ROW")),
+#     start_time = 1750
+#   )
+# )
+# 
+# implocexp_NOR = import_export_local_transmission(tree,replicates_NOR[,1:2],start_time=1750,time_interval_size = 1, focal_location = "Norway")
+# Summarize_import_export_local_transmission(implocexp_NOR)
+# 
+# length(replicates_NOR[,1]$Lineage_sizes[which(replicates_NOR[,1]$lineage_state==1)]) #508 imports here.
+# length(replicates_NOR[,1]$unobserved_tl_halfedge_above_mrca)
+# sum(replicates_NOR[,1]$unobserved_tl_states==1) #227 imports here.
 #In total we therefore have 508+227 = 735 imports, of which 227 is unobserved.
 
 
@@ -380,7 +381,7 @@ g6 = boxplot_boxplot_frame(comparison_USA_EUR, variable="LC", x_lab="Period")
  
 ## Stratifying the estimates on the periods 2010-2014, 2014-2018, and 2010-2018 (total), we obtain the following estimates
 
-```{r, echo=F,include=T, fig.width=15, fig.height=15}
+```{r, echo=F,include=T}
 
 grid.arrange(g1,g2,g3)
 grid.arrange(g4,g5,g6)
@@ -389,7 +390,7 @@ grid.arrange(g4,g5,g6)
  
 By dividing importation and exportation by (import + local transmission) and (export + local transmission), respectively, we obtain the following estimates: 
 
-```{r, echo=F,include=T, fig.width=15, fig.height=15}
+```{r, echo=F,include=T}
 # Import / (Import + LC)
 #pdf(paste0(path_results,"Import_by_LC_NOR_AUS.pdf"), width=10, height=10)
 boxplot_boxplot_frame_import_by_LC(comparison_NOR_AUS)
@@ -417,48 +418,79 @@ boxplot_boxplot_frame_Export_by_LC(comparison_USA_EUR, ylims=c(0,0.2))
 
 ```
 
-The fraction of total events that are imports, exports and local transmissions in the period 2000-2018 are visualized below. 
+## Fraction of total events that are imports, exports and local transmissions in the period 2000-2018.
 
-```{r, include=TRUE}
+### Norway
+
+```{r, echo=F,include=TRUE}
 
 #pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/imp_exp_loc_NOR.pdf", width = 10, height = 8)
 plot_relative_fraction(implocexp_NOR)
 #dev.off()
+```
+ 
+### Australia
+
+```{r, echo=F,include=TRUE}
 
 #pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/imp_exp_loc_AUS.pdf", width = 10, height = 8)
 plot_relative_fraction(implocexp_AUS)
 #dev.off()
 
+```
+
+### USA
+
+```{r, echo=F,include=TRUE}
 #pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/imp_exp_loc_USA.pdf", width = 10, height = 8)
 plot_relative_fraction(implocexp_USA)
 #dev.off()
 
+```
+### Europe
+```{r, echo=F,include=TRUE}
 
 #pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/imp_exp_loc_EUR.pdf", width = 10, height = 8)
 plot_relative_fraction(implocexp_EUR)
 #dev.off()
 
-
 ```
+ 
+## Absolute estimates of imports, exports and local transmission in the period 2000-2018. 
 
-The absolute estimates on the same periods are shown below. 
+### Norway
 
 ```{r remedy003, echo=F}
 #pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_NOR.pdf", width = 10, height = 8)
 plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_NOR,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"), main_title = "Norway")
 plot.new()
 #dev.off()
+```
+
+### Australia
+
+```{r, echo=F}
 
 #pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_AUS.pdf", width = 10, height = 8)
 plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_AUS,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"),main_title = "Australia")
 plot.new()
 #dev.off()
 
+```
+
+### USA
+  
+```{r, echo=F}
 #pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_USA.pdf", width = 10, height = 8)
 plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_USA,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"), main_title = "USA")
 plot.new()
 #dev.off()
 
+```
+
+### Europe
+
+```{r, echo=F}
 
 #pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_EUR.pdf", width = 10, height = 8)
 plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_EUR,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"), main_title = "Europe")

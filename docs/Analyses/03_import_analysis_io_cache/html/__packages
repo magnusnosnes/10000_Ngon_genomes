@@ -1,14 +1,6 @@
-base
-methods
-datasets
-utils
-grDevices
-graphics
-stats
 ape
 LineageHomology
 skygrowth
-grid
 scales
 gridExtra
 ggplot2
@@ -25,3 +17,4 @@ bslib
 thematic
 shinycssloaders
 wesanderson
+ggtree
