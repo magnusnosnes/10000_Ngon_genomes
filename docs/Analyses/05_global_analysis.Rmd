@@ -1,13 +1,18 @@
 ---
-knit: (function(input_file, encoding) {
-  out_dir <- '.';
-  rmarkdown::render(input_file,
- encoding=encoding,
- output_file=file.path(dirname(input_file), out_dir, 'global_analysis.html'))})
+title: Global Analysis
+output:
+    html_document:
+        toc: true
+        theme: united
+ #    knit: (function(input_file, encoding) {
+ #  out_dir <- '.';
+ #  rmarkdown::render(input_file,
+ # encoding=encoding,
+ # output_file=file.path(dirname(input_file), out_dir, 'global_analysis.html'))})
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = T, warning=FALSE, collapse=T, cache=T, 'styler', tidy.opts=list(strict=T))
 
 ```
 

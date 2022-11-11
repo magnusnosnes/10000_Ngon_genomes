@@ -1,16 +1,21 @@
 ---
-knit: (function(input_file, encoding) {
-  out_dir <- '.';
-  rmarkdown::render(input_file,
- encoding=encoding,
- output_file=file.path(dirname(input_file), out_dir, 'Growth_rates_explanatory.html'))})
+# knit: (function(input_file, encoding) {
+#   out_dir <- '.';
+#   rmarkdown::render(input_file,
+#  encoding=encoding,
+#  output_file=file.path(dirname(input_file), out_dir, 'Growth_rates_explanatory.html'))})
+title: Growth rate of the largest transmission lineages and its relation to explanatory variables
+output:
+    html_document:
+        toc: true
+        theme: united
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, collapse=T, cache=T, 'styler', tidy.opts=list(strict=T))
 ```
-## 
-```{r, echo=FALSE, include=FALSE}
+
+```{r loading_global_environment, echo=FALSE, include=FALSE}
 
 #   ____________________________________________________________________________
 #   Analysis                                                                ####
@@ -178,6 +183,19 @@ r_USA = return_growth_interval(clusterwise_output=neg_sizes_USA, time_shift_list
 r_EUR = return_growth_interval(clusterwise_output=neg_sizes_EUR, time_shift_list=cluster_times_EUR)
 r_all = c(r_NOR,r_AUS,r_USA,r_EUR)
 
+
+find_lineage_age = function(result, larger_than) {
+  rel_inds = which(result$Lineage_sizes>larger_than)
+  lineage_age = c()
+  for(i in rel_inds){
+    result$Taxa_names[[i]]
+    youngest_sequence = max(name_date$dates[unlist(lapply(result$Taxa_names[[i]], FUN=function(x) which(x==name_date$name)))])
+    tl_age = youngest_sequence-result$Halfedge_over_tmrca[i]
+    lineage_age = c(lineage_age,tl_age)
+  }
+  lineage_age
+}
+
 define_explanatory_variables = function(result, larger_than) {
   #Sex distribution
   sex = sex_distributions(RLH = result,larger_than=larger_than)
@@ -211,7 +229,8 @@ define_explanatory_variables = function(result, larger_than) {
     maxind=which.max(penAscounts)
     penA_variable=c(penA_variable,penAs$State[i+(maxind-1)])
   }
-  d1 = data.frame(lineage_size,penA_variable,mtr_variable,sex_variable)
+  lineage_age = find_lineage_age(result=result, larger_than=larger_than)
+  d1 = data.frame(lineage_size,penA_variable,mtr_variable,sex_variable, lineage_age)
   return(d1)
 }
 
@@ -220,11 +239,15 @@ d2 = define_explanatory_variables(Result_AUS,larger_than=10)
 d3 = define_explanatory_variables(Result_USA,larger_than=10)
 d4 = define_explanatory_variables(Result_EUR,larger_than=10)
 
+
+
+
+
 #Gather data
 total_data = rbind(d1,d2,d3,d4)
 locations = c(rep("Norway",length(r_NOR)),rep("Australia",length(r_AUS)),rep("USA",length(r_USA)), rep("EUR",length(r_EUR)))
 total_data = cbind(r_all,locations,total_data) #Add growth rate
-colnames(total_data)= c("GrowthRate","locations", "tlSize","penA","mtr", "sexDistribution") 
+colnames(total_data)= c("GrowthRate","locations", "tlSize","penA","mtr", "sexDistribution", "lineage_age") 
 
 #   ____________________________________________________________________________
 #   Report starts from here                                                 ####
@@ -232,44 +255,42 @@ colnames(total_data)= c("GrowthRate","locations", "tlSize","penA","mtr", "sexDis
 
 ```
 
-## Analysis of the growth rate of the largest tranmission lineages and their relation to explanatory variables.
-
-##### Research question: Is the growth and size of transmission lineages in the time period 2010-2017 dependent on any of the explanatory variables: Sex distribution in the clade, mtrD status, penA status, or final lineage size (transmissin lineage size)?.
+## **Research question: Is the growth and size of transmission lineages in the time period 2010-2017 dependent on any of the explanatory variables: Sex distribution in the clade, mtrD status, penA status, or final lineage size (transmission lineage size)?.**
 
 The input for the following analyses are all the transmission lineages containing more than 10 sequences from each location: (Norway, Australia, USA). For each of the transmission lineages we run [skygrowth v.0.3.1](https://github.com/mrc-ide/skygrowth) on the clades, and extract the growth rate of the effective population size in the time interval 2010-2017
 
-### Transmission lineages in Norway
+## Transmission lineages in Norway
 
-```{r, echo=FALSE}
+```{r, echo=F}
 
 noquote("Size of transmission lineages containing more than 10 sequences:")
 Result_NOR$Lineage_sizes[Result_NOR$Lineage_sizes>10]
 noquote("Number of transmission containing more than 10 sequences:")
 length(Result_NOR$Lineage_sizes[Result_NOR$Lineage_sizes>10])
 
-``` 
+```
 
-
-With estimated arrival times (midpoint of the ancestral branch of the transmission lineage) in Norway:  
+With estimated arrival times (midpoint of the ancestral branch of the transmission lineage) in Norway:
 
 ```{r, echo=FALSE}
 
 noquote("Estimated arrival time in Norway")
 Result_NOR$Halfedge_over_tmrca[Result_NOR$Lineage_sizes>10]
 
-``` 
+```
 
-From skygrowth we find that the average growth rate of these effective population size of these lineage on the time interval 2010-2017 is: 
+From skygrowth we find that the average growth rate of these effective population size of these lineage on the time interval 2010-2017 is:
+
 ```{r, echo=FALSE}
 noquote("Average growth rate in 2010-2017:")
 r_NOR
-``` 
+```
 
-The fourth to the last produces the value "NA", because this transmission lineage does not exist on the time interval [2010, 2017].
+The fourth to the last value produces the value "NA", because this transmission lineage does not exist on the time interval [2010, 2017].
 
 Similarly, for Australia and USA we find:
 
-### Transmission lineages in Australia
+## Transmission lineages in Australia
 
 ```{r, echo=FALSE}
 noquote("Size of transmission lineages containing more than 10 sequences:")
@@ -284,7 +305,7 @@ noquote("Average growth rate in 2010-2017:")
 r_AUS
 ```
 
-### Transmission lineages in USA
+## Transmission lineages in USA
 
 ```{r, echo=FALSE}
 noquote("Size of transmission lineages containing more than 10 sequences:")
@@ -298,9 +319,9 @@ Result_USA$Halfedge_over_tmrca[Result_USA$Lineage_sizes>10]
 noquote("Average growth rate in 2010-2017:")
 r_USA
 
-``` 
+```
 
-### Transmission lineages in Europe
+## Transmission lineages in Europe
 
 ```{r, echo=FALSE}
 noquote("Size of transmission lineages containing more than 10 sequences:")
@@ -314,21 +335,21 @@ Result_EUR$Halfedge_over_tmrca[Result_EUR$Lineage_sizes>10]
 noquote("Average growth rate in 2010-2017:")
 r_EUR
 
-``` 
-## Metadata
+```
+
+## Defining Metadata
 
 To study the relation of the growth rates to metadata we collect the growth rates in a data frame along with variables that describe the sex distribution, penA status and mtrD status for each transmission lineage.
 
 The dataset now looks like
+
 ```{r, echo=FALSE}
 head(total_data)
 str(total_data)
 
 ```
 
-
-## Modeling the growth rates and lineage sizes on the metadata
-
+## Modeling the growth rates and transmission lineage sizes on metadata
 
 ```{r, echo=FALSE, include = T}
 
@@ -338,7 +359,7 @@ g2
 
 ```
 
-Here we investigate the growth rate and size of the transmission lineages, and the relation of these to the explanatory variables: penA, mtrD, sex distribution and location. 
+Here we investigate the growth rate and size of the transmission lineages, and the relation of these to the explanatory variables: penA, mtrD, sex distribution and location.
 
 ```{r, echo=FALSE, include = T, warning=F, message=F}
 g1 = ggplot(total_data, aes(x=sexDistribution, y=GrowthRate, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Growth rate")+theme(legend.position = "none")+geom_smooth(method="lm",alpha=0.15)
@@ -369,13 +390,9 @@ total_data_modified$mtr[total_data_modified$mtr!="non-mosaic"]="mosaic"
 total_data_modified$mtr[total_data_modified$mtr=="semi-mosaic"]="mosaic"
 ```
 
-Doing the analyses individually for Norway/Australia, and Europe/USA. 
-For the regression analyses we first consider epifactors alone: location and sex distribution (fraction M/(M+F)) and the interaction of these.
-We perform the comparisons for Norway versus Australia and Europe versus the USA - since these geographical regions are of more similar sizes.
-We run the regressions with 1. both factors included 2. one regression for each factor alone. 
+Doing the analyses individually for Norway/Australia, and Europe/USA. For the regression analyses we first consider epifactors alone: location and sex distribution (fraction M/(M+F)) and the interaction of these. We perform the comparisons for Norway versus Australia and Europe versus the USA - since these geographical regions are of more similar sizes. We run the regressions with 1. both factors included 2. one regression for each factor alone.
 
 Next we look at the effects of mtr and penA variants. Since we believe location and sexDistribution to be important, we keep these in the model and their interaction
-
 
 ```{r, echo=FALSE, include = T}
 #Pairwise comparisons between Norway and Australia and Europe and USA
@@ -390,9 +407,10 @@ total_data_large_scale = total_data_modified[which(total_data_modified[,"locatio
 
 ```{r, echo=FALSE, include = T}
 #Lineage size and growth on location
-mod_lineage_size = lm(log(tlSize)~locations, data = total_data_small_scale)
+mod_lineage_size = lm(log(tlSize)~locations+lineage_age, data = total_data_small_scale)
 summary(mod_lineage_size)
 coefplot(mod_lineage_size)+theme_bw()
+plot(x=predict(mod_lineage_size), y=total_data_small_scale$tlSize)
 
 mod_lineage_size = lm(GrowthRate~locations, data = total_data_small_scale)
 summary(mod_lineage_size)
@@ -448,9 +466,7 @@ coefplot(mod_lineage_size)+theme_bw()
 
 
 ```
- 
- 
- 
+
 ```{r, echo=FALSE, include = T}
 #Lineage size and growth on sex
 
@@ -481,7 +497,6 @@ coefplot(mod_lineage_size)+theme_bw()
 
 ```
 
-
 ```{r, echo=FALSE, include = F}
 
 mod_total = lm(r_all~factor(penA)+factor(mtr)+sexDistribution, data = total_data); summary(mod_total)
@@ -506,7 +521,6 @@ summary(mod3)
 # penA_mosaic_distribution(Result,larger_than = input$largerthan)
 
 ```
-
 
 ```{r, echo=FALSE, include = F}
 library(svglite)

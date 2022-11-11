@@ -1,13 +1,19 @@
 ---
-knit: (function(input_file, encoding) {
-  out_dir <- '.';
-  rmarkdown::render(input_file,
- encoding=encoding,
- output_file=file.path(dirname(input_file), out_dir, 'LineagesAndImport.html'))})
+# knit: (function(input_file, encoding) {
+#   out_dir <- '.';
+#   rmarkdown::render(input_file,
+#  encoding=encoding,
+#  output_file=file.path(dirname(input_file), out_dir, 'LineagesAndImport.html'))})
+#  
+title: Import, export and local transmission
+output:
+    html_document:
+        toc: true
+        theme: united
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, collapse=T, cache=T, 'styler', tidy.opts=list(strict=T))
 ```
 
 # Import and local transmission analysis
