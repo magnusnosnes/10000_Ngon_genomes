@@ -27,7 +27,7 @@ The R-shiny app above displays the estimated [transmission lineages](https://www
 ### [Import and local transmission analyses](Analyses/LineagesAndImport.html)
 
 
-[<img src="Files/Import_local_transmission.png" width="500"/>](Analyses/LineagesAndImport.html)
+[<img src="Files/Import_local_transmission.png" width="500"/>](Analyses/03_import_analysis_io.html)
 
 This analysis provides estimates of the total number of importation and local transmission events in each location. Additionally we use the transmission lineages to derive importation and local transmission over time. 
 
@@ -35,7 +35,7 @@ This analysis provides estimates of the total number of importation and local tr
 
 
 
-### [Growth rate of lineages and relation to metadata](Analyses/Growth_rates_explanatory.html)
+### [Growth rate of lineages and relation to metadata](Analyses/04_growth_rate_analysis.html)
 
 [<img src="Files/Metadata.png" width="500"/>](Analyses/Growth_rates_explanatory.html)
 
@@ -52,7 +52,7 @@ This analysis explores the relation of the growth rate of the transmission in th
 
 
 
-[<img src="Files/Global_analysis.png" width="500"/>](Analyses/global_analysis.html)
+[<img src="Files/Global_analysis.png" width="500"/>](Analyses/05_global_analysis.html)
 
 This analysis does not define clades based on the concept of transmission lineages as above, but instead focuses on large clades defined by metadata such as the genes: mtr mosaic and penA mosaic, MIC category (high or low), and sex distribution. We describe the effective population size dynamics in the large clades and relate this to the metadata. 
 
