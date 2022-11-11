@@ -24,10 +24,10 @@ The R-shiny app above displays the estimated [transmission lineages](https://www
 
 
 
-### [Import and local transmission analyses](Analyses/LineagesAndImport.html)
+### [Import and local transmission analyses](Analyses/03_import_analysis_io.html))
 
 
-[<img src="Files/Import_local_transmission.png" width="500"/>](Analyses/03_import_analysis_io.html)
+[<img src="Files/Import_local_transmission.png" width="500"/>](Analyses/03_import_analysis_io.html))
 
 This analysis provides estimates of the total number of importation and local transmission events in each location. Additionally we use the transmission lineages to derive importation and local transmission over time. 
 
