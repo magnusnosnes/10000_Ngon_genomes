@@ -1,5 +1,5 @@
 ---
-title: Global Analysis
+title: # Metadata and effective population size analysis
 output:
     html_document:
         toc: true
@@ -115,7 +115,6 @@ length(tree$tip.label); length(remainder_tree$tip.label); length(mtrSubtree$tip.
 
 ```
 
-# Metadata and effective population size analysis
 
 Here we describe large clades that differ in some metadata with respect to the rest of the tree clades of the tree. 
 Specifically we investigate clades that differ wrt. the variants of the mosaic variants of the genes mtr and penA, minimum inhibitory concentration (MIC) (categorized into levels high and low) levels,  and  sex  distribution, 
@@ -292,7 +291,7 @@ p3=  p1+geom_facet(panel = "mtrMosaic", data =df_bar, geom = geom_col,
 
 ```
 
-### Full tree with metadata
+## Full tree with metadata
 
 The annotated tree shows that most of the mosaic variant of mtr cluster in distict parts of the tree. 
 Variants of penA that are related to high MIC also make up distinct clusters. 
@@ -309,7 +308,7 @@ p2
 
 ```
 
-## An interactive version of the plot can be explored below
+## Interactive version of the phylogeny with metadata
 
 ```{r,  include=T, echo=F, warning=F, fig.height=10, fig.width=10}
 #Interactive plot
@@ -378,7 +377,6 @@ subtree_plots1(color1="#E69F00", color2="#56B4E9", mtr_clade = mtr_clade,penA_hi
 
 ```
  
-## TBD
  
 ```{r, echo=F, include=T, fig.height=10, fig.width=10, warning=F}
 subtree_plots2(color1="#009E73", color2="#CC79A7",penA_highMic_mosaic2 = penA_highMic_mosaic2,penA_highMic_nonMosaic = penA_highMic_nonMosaic,skyhighMic_mosaic2 = skyhighMic_mosaic2,skyhighMic_nonMosaic = skyhighMic_nonMosaic)
@@ -387,6 +385,8 @@ subtree_plots2(color1="#009E73", color2="#CC79A7",penA_highMic_mosaic2 = penA_hi
 
 All of the clades grew in the period 1980-2010. After 2010 the effective population size falls for all the clades define by penA variants, while mtr continues growing or alternatively stablizes. 
 The effective population size in the tree as a whole is shown below. The clades from above are highlighted.
+
+## Full phylogeny and effective population size of the global tree
 
 ```{r, echo=F, include=T, fig.height=10, fig.width=10, warning=F}
 g5 = custom_skygrowth_plot(skyFullTree, shift_time=1750, logy=F)+ggtitle("Full Tree")+
@@ -398,6 +398,7 @@ color_mapping_tree = c("0"="#000000","1"="#E69F00" , "2"="#56B4E9", "3" = "#009E
 g6 = ggtree(g6, mrsd = "2019-08-01",aes(color=group))+scale_x_continuous(breaks=seq(1750,2020,20),expand=c(0,0))+scale_color_manual("Clade",values=color_mapping_tree)+theme(legend.position="none")
 grid.arrange(g6,g5,ncol=1)
 ```
+
 
 The high effective population (with very high uncertainty from the confidence intervals) size from 1770-1800 is a result of the long basal branches which probably displays a lack of sequences that represent the divergence that happened in this time period. From 1810-2010 the effective population size have been steadily growing, with a pronounced decrease since 2010.
 
