@@ -263,34 +263,34 @@ colnames(total_data)= c("GrowthRate","locations", "tlSize","penA","mtr", "sexDis
 
 ## **Research question**
 
-Is the growth and size of transmission lineages in the time period 2010-2017 dependent on any of the explanatory variables: Sex distribution in the clade, mtrD status, penA status, or final lineage size (transmission lineage size)?.
+Is the growth and size of transmission lineages in the time period 2000-2017 dependent on any of the explanatory variables: Sex distribution in the clade, mtrD status, penA status, or final lineage size (transmission lineage size)?.
 
-The input for the following analyses are all the transmission lineages containing more than 10 sequences from each location: (Norway, Australia, USA). For each of the transmission lineages we run [skygrowth v.0.3.1](https://github.com/mrc-ide/skygrowth) on the clades, and extract the growth rate of the effective population size in the time interval 2010-2017
+The input for the following analyses are all the transmission lineages containing more than 10 sequences from each location: (Norway, Australia, USA). For each of the transmission lineages we run [skygrowth v.0.3.1](https://github.com/mrc-ide/skygrowth) on the clades, and extract the growth rate of the effective population size in the time interval 2000-2017
 
 ## Transmission lineages in Norway
 
+Size of transmission lineages containing more than 10 sequences:
+
 ```{r, echo=F}
-
-noquote("Size of transmission lineages containing more than 10 sequences:")
 Result_NOR$Lineage_sizes[Result_NOR$Lineage_sizes>10]
-noquote("Number of transmission containing more than 10 sequences:")
-length(Result_NOR$Lineage_sizes[Result_NOR$Lineage_sizes>10])
 
+```
+
+Number of transmission containing more than 10 sequences:
+ 
+```{r, echo=F}
+length(Result_NOR$Lineage_sizes[Result_NOR$Lineage_sizes>10])
 ```
 
 With estimated arrival times (midpoint of the ancestral branch of the transmission lineage) in Norway:
 
 ```{r, echo=FALSE}
-
-noquote("Estimated arrival time in Norway")
 Result_NOR$Halfedge_over_tmrca[Result_NOR$Lineage_sizes>10]
-
 ```
 
 From skygrowth we find that the average growth rate of these effective population size of these lineage on the time interval 2010-2017 is:
 
 ```{r, echo=FALSE}
-noquote("Average growth rate in 2010-2017:")
 r_NOR
 ```
 
@@ -300,11 +300,18 @@ Similarly, for Australia and USA we find:
 
 ## Transmission lineages in Australia
 
+Size of transmission lineages containing more than 10 sequences:
 ```{r, echo=FALSE}
-noquote("Size of transmission lineages containing more than 10 sequences:")
 Result_AUS$Lineage_sizes[Result_AUS$Lineage_sizes>10]
-noquote("Number of transmission containing more than 10 sequences:")
+```
+ 
+Number of transmission containing more than 10 sequences:
+ 
+```{r, echo=FALSE}
 length(Result_AUS$Lineage_sizes[Result_AUS$Lineage_sizes>10])
+```
+ 
+```{r, echo=FALSE}
 
 noquote("Estimated arrival time in Australia")
 Result_AUS$Halfedge_over_tmrca[Result_AUS$Lineage_sizes>10]
@@ -315,52 +322,70 @@ r_AUS
 
 ## Transmission lineages in USA
 
+Size of transmission lineages containing more than 10 sequences:
 ```{r, echo=FALSE}
-noquote("Size of transmission lineages containing more than 10 sequences:")
 Result_USA$Lineage_sizes[Result_USA$Lineage_sizes>10]
-noquote("Number of transmission containing more than 10 sequences:")
-length(Result_USA$Lineage_sizes[Result_USA$Lineage_sizes>10])
+```
 
-noquote("Estimated arrival time in USA")
+Number of transmission containing more than 10 sequences:
+
+```{r, echo=FALSE}
+length(Result_USA$Lineage_sizes[Result_USA$Lineage_sizes>10])
+```
+
+Estimated arrival time in USA
+
+```{r, echo=FALSE}
+
 Result_USA$Halfedge_over_tmrca[Result_USA$Lineage_sizes>10]
 
-noquote("Average growth rate in 2010-2017:")
-r_USA
+```
 
+Average growth rate in 2010-2017:
+
+```{r, echo=FALSE}
+r_USA
 ```
 
 ## Transmission lineages in Europe
 
+Size of transmission lineages containing more than 10 sequences:
 ```{r, echo=FALSE}
-noquote("Size of transmission lineages containing more than 10 sequences:")
 Result_EUR$Lineage_sizes[Result_EUR$Lineage_sizes>10]
-noquote("Number of transmission containing more than 10 sequences:")
+```
+
+Number of transmission containing more than 10 sequences:
+
+```{r, echo=FALSE}
 length(Result_EUR$Lineage_sizes[Result_EUR$Lineage_sizes>10])
 
-noquote("Estimated arrival time in Europe")
+```
+
+Estimated arrival time in Europe:
+
+```{r, echo=FALSE}
 Result_EUR$Halfedge_over_tmrca[Result_EUR$Lineage_sizes>10]
+```
 
-noquote("Average growth rate in 2010-2017:")
+Average growth rate in 2010-2017:
+
+```{r, echo=FALSE}
 r_EUR
-
 ```
 
 ## Defining Metadata
 
 To study the relation of the growth rates to metadata we collect the growth rates in a data frame along with variables that describe the sex distribution, penA status and mtrD status for each transmission lineage.
 
-The dataset now looks like
+The dataset now looks like:
 
 ```{r, echo=FALSE}
 head(total_data)
-noquote("")
-
 ```
 
-With the structures
+With the structures:
 
 ```{r, echo=FALSE}
-print("")
 str(total_data)
 
 ```
@@ -368,7 +393,6 @@ str(total_data)
 ## The relation of the growth rates and sizes of the transmission lineages to metadata
 
 ```{r, echo=FALSE, include = T}
-
 library(grid)
 g2 = ggplot(total_data)+theme_bw()+geom_point(aes(x=tlSize, y=GrowthRate,color=locations))+theme(legend.position = c(0.8,0.8))+ylab("Growth rate")+xlab("Transmission lineage size")
 g2
@@ -513,11 +537,11 @@ coefplot(mod_lineage_size)+theme_bw()
 
 ```
 
-### The effects of *penA* and *mtrD*
+## The effects of *penA* and *mtrD*
 
-#### *penA*
+### *penA*
 
-##### Norway and Australia
+#### Norway and Australia
 
 ```{r, echo=FALSE, include = T}
 #Lineage size and growth on sex
@@ -534,7 +558,7 @@ coefplot(mod_growthRate)+theme_bw()
 
 ```
 
-##### Europe and USA
+#### Europe and USA
 
 ```{r, echo=FALSE, include = T}
 
@@ -558,9 +582,9 @@ coefplot(mod_growthRate)+theme_bw()
 
 ```
 
-#### *mtrD*
+### *mtrD*
 
-##### Norway and Australia
+#### Norway and Australia
 
 ```{r, echo=FALSE, include = T}
 mod_growthRate = lm(GrowthRate~mtr+sexDistribution+locations, data = total_data_small_scale)
@@ -568,14 +592,13 @@ summary(mod_growthRate)
 coefplot(mod_growthRate)+theme_bw()
 ```
 
-##### Europe and USA
+#### Europe and USA
 
 ```{r, echo=FALSE, include = T}
 mod_growthRate = lm(GrowthRate~mtr+sexDistribution+locations, data = total_data_large_scale)
 summary(mod_growthRate)
 coefplot(mod_growthRate)+theme_bw()
 ```
-
 
 ```{r, echo=FALSE, include = F}
 #library(bannerCommenter)
