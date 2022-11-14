@@ -159,20 +159,38 @@ From the mapped geographical lineage distributions we can derive the number of i
 
 The following plots show the cumulative number of sequences obtained from each estimated transmission lineage over time
 
+### Norway
+
 ```{r, include=TRUE, warning=FALSE}
 name_date_NOR = name_date[name_date$name%in%nor_tips,]
 linfo_NOR = lineage_info(Result_NOR,name_date = name_date_NOR)
 LineageHomology::lineage_growth_cumulative(linfo_NOR,datelims=c("2015-01-01","2019-06-15","1 year"))
 
 
+```
+ 
+### Australia
+
+```{r, include=TRUE, warning=FALSE}
 name_date_AUS = name_date[name_date$name%in%aus_tips,]
 linfo_AUS = lineage_info(Result_AUS,name_date = name_date_AUS)
 LineageHomology::lineage_growth_cumulative(linfo_AUS,datelims=c("2016-07-01","2018-06-15","5 months"))
 
+
+```
+ 
+### The USA
+ 
+```{r, include=TRUE, warning=FALSE}
 name_date_USA = name_date[name_date$name%in%usa_tips,]
 linfo_USA = lineage_info(Result_USA,name_date = name_date_USA)
 LineageHomology::lineage_growth_cumulative(linfo_USA,datelims=c("2008-07-01","2019-06-15","2 year"))
 
+```
+ 
+### Europe 
+ 
+```{r, include=TRUE, warning=FALSE}
 name_date_EUR = name_date[name_date$name%in%eur_tips,]
 linfo_EUR = lineage_info(Result_EUR,name_date = name_date_EUR)
 LineageHomology::lineage_growth_cumulative(linfo_EUR,datelims=c("2008-07-01","2019-06-15","2 year"))
@@ -383,14 +401,14 @@ theme(legend.position = "none")+ylab("")
 
 ## Stratifying the estimates on the periods 2010-2014, 2014-2018, and 2010-2018 (total), we obtain the following estimates
 
-### Norway versus Australia
+### Norway and Australia
 
 ```{r, echo=F,include=T, fig.size=10,fig.height=10}
 library(grid)
 grid.arrange(g1,g2,g3)
 ```
 
-### Europe versus USA
+### Europe and USA
 
 ```{r, echo=F,include=T, fig.size=10,fig.height=10}
 grid.arrange(g4,g5,g6)
@@ -401,12 +419,19 @@ grid.arrange(g4,g5,g6)
 
 By dividing importation and exportation by (import + local transmission - export) respectively, we obtain the following estimates of the number of cases in the given locations that can be explained by importation.
 
+### Norway and Australia
+
 ```{r, echo=F,include=T}
 # Import / (Import + LC)
 #pdf(paste0(path_results,"Import_by_LC_NOR_AUS.pdf"), width=10, height=10)
 boxplot_boxplot_frame_import_by_LC(comparison_NOR_AUS, ylims=c(0,0.5))
 
 #dev.off()
+```
+ 
+### Europe and the USA
+ 
+```{r, echo=F,include=T}
 
 #pdf(paste0(path_results,"Import_by_LC_USA_EUR.pdf"), width=10, height=10)
 boxplot_boxplot_frame_import_by_LC(comparison_USA_EUR, ylims=c(0,0.2))
@@ -472,24 +497,38 @@ plot_relative_fraction(implocexp_EUR)
 
 ## Absolute estimates of imports, exports and local transmission in the period 2000-2018.
 
+### Norway
 
 ```{r remedy003, echo=F, fig.height=8, fig.width=8}
 #pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_NOR.pdf", width = 10, height = 8)
 plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_NOR, start_time = 1750, date_breaks = 2, time_interval = c("2000-01-01","2018-01-01"), main_title = "Norway")
-plot.new()
 #dev.off()
 
+```
+
+### Australia
+
+```{r, echo=F, fig.height=8, fig.width=8}
 #pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_AUS.pdf", width = 10, height = 8)
 plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_AUS, start_time = 1750, date_breaks = 2, time_interval = c("2000-01-01","2018-01-01"), main_title = "Australia")
-plot.new()
 #dev.off()
 
+```
+ 
+### The USA
+ 
+```{r, echo=F, fig.height=8, fig.width=8}
 #pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_USA.pdf", width = 10, height = 8)
 plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_USA, start_time = 1750, date_breaks = 2, time_interval = c("2000-01-01","2018-01-01"), main_title = "USA")
-plot.new()
+
 #dev.off()
 
 
+```
+ 
+### Europe
+
+```{r, echo=F, fig.height=8, fig.width=8}
 
 #pdf("/Users/magnusnygardosnes/Dropbox/10000_Lovers/Junk_used_for_exploratory/Temp/absolutes_imp_exp_loc_EUR.pdf", width = 10, height = 8)
 plot_import_export_local_transmission(tree = tree, result_import_export_local_transmission = implocexp_EUR,start_time = 1750,date_breaks = 2,time_interval = c("2000-01-01","2018-01-01"), main_title = "Europe")
