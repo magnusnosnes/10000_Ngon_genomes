@@ -55,7 +55,7 @@ Result_EUR=LineageHomology::reorder_LH(Result_EUR)
 #   Set up treeclusters: Focus on the 20 largest from each location         ####
 
 ```
- 
+
 ```{r script specific functions, echo=FALSE, include=FALSE}
 clusters_and_times = function(result,main_tree,larger_than=10) {
   
@@ -176,7 +176,7 @@ define_explanatory_variables = function(result, larger_than) {
 
 
 ```
- 
+
 ```{r Analysis and environment, echo=FALSE, include=FALSE}
 #Results for Norway
 cluster_times_NOR = clusters_and_times(Result_NOR, main_tree = tree)
@@ -261,7 +261,7 @@ colnames(total_data)= c("GrowthRate","locations", "tlSize","penA","mtr", "sexDis
 
 ```
 
-## **Research question** 
+## **Research question**
 
 Is the growth and size of transmission lineages in the time period 2010-2017 dependent on any of the explanatory variables: Sex distribution in the clade, mtrD status, penA status, or final lineage size (transmission lineage size)?.
 
@@ -356,14 +356,16 @@ head(total_data)
 noquote("")
 
 ```
-With the structures 
+
+With the structures
+
 ```{r, echo=FALSE}
 print("")
 str(total_data)
 
 ```
 
-## Modeling the growth rates and transmission lineage sizes on metadata
+## The relation of the growth rates and sizes of the transmission lineages to metadata
 
 ```{r, echo=FALSE, include = T}
 
@@ -419,9 +421,9 @@ total_data_large_scale = total_data_modified[which(total_data_modified[,"locatio
 
 ## Modeling the drivers of lineage growth rate
 
-### Norway versus Australia
+### The effect of location
 
-#### The effect of location
+#### Norway and Australia
 
 ```{r, echo=FALSE, include = T}
 #Lineage size and growth on location
@@ -435,24 +437,8 @@ summary(mod_lineage_size)
 coefplot(mod_lineage_size)+theme_bw()
 
 ```
- 
-#### Observed gender distribution in the TL
 
-```{r, echo=FALSE, include = T}
-# mod_lineage_size = lm(log(tlSize)~sexDistribution, data = total_data_small_scale)
-# summary(mod_lineage_size)
-# coefplot(mod_lineage_size)+theme_bw()
-
-mod_lineage_size = lm(GrowthRate~sexDistribution, data = total_data_small_scale)
-summary(mod_lineage_size)
-coefplot(mod_lineage_size)+theme_bw()
-
-
-```
- 
-### Europe versus USA
- 
-#### The effect of location
+#### Europe and USA
 
 ```{r, echo=FALSE, include = T}
 # mod_lineage_size = lm(log(tlSize)~locations, data = total_data_large_scale)
@@ -469,9 +455,25 @@ coefplot(mod_lineage_size)+theme_bw()
 
 
 ```
- 
-#### Observed gender distribution in the TL
- 
+
+### Observed gender distribution in the TLs
+
+#### Norway and Australia
+
+```{r, echo=FALSE, include = T}
+# mod_lineage_size = lm(log(tlSize)~sexDistribution, data = total_data_small_scale)
+# summary(mod_lineage_size)
+# coefplot(mod_lineage_size)+theme_bw()
+
+mod_lineage_size = lm(GrowthRate~sexDistribution, data = total_data_small_scale)
+summary(mod_lineage_size)
+coefplot(mod_lineage_size)+theme_bw()
+
+
+```
+
+#### Europe and USA
+
 ```{r, echo=FALSE, include = T}
 mod_lineage_size = lm(GrowthRate~sexDistribution, data = total_data_large_scale)
 summary(mod_lineage_size)
@@ -479,9 +481,9 @@ coefplot(mod_lineage_size)+theme_bw()
 
 ```
 
-## Growthrate modeled by gender distribution and location and interaction
+### The interaction of gender distribution and location
 
-### Europe versus USA
+#### Norway and Australia
 
 ```{r, echo=FALSE, include = T}
 # #Lineage size and growth rate on epifactors
@@ -500,7 +502,7 @@ coefplot(mod_lineage_size)+theme_bw()
 
 ```
 
-### Norway versus Australia
+#### Europe and USA
 
 ```{r, echo=FALSE, include = T}
 
@@ -511,7 +513,11 @@ coefplot(mod_lineage_size)+theme_bw()
 
 ```
 
-## Growthrate modeled by penA+mtr+sexDistribution+locations+sexDistribution:locations
+### The effects of *penA* and *mtrD*
+
+#### *penA*
+
+##### Norway and Australia
 
 ```{r, echo=FALSE, include = T}
 #Lineage size and growth on sex
@@ -522,10 +528,19 @@ coefplot(mod_lineage_size)+theme_bw()
 # summary(mod_lineage_size)
 # coefplot(mod_lineage_size)+theme_bw()
 
-mod_growthRate = lm(log(GrowthRate)~penA+mtr+sexDistribution+locations+sexDistribution:locations, data = total_data_small_scale)
+mod_growthRate = lm(GrowthRate~penA+sexDistribution+locations, data = total_data_small_scale)
 summary(mod_growthRate)
 coefplot(mod_growthRate)+theme_bw()
 
+```
+
+##### Europe and USA
+
+```{r, echo=FALSE, include = T}
+
+mod_growthRate = lm(log(GrowthRate)~penA+sexDistribution+locations, data = total_data_large_scale)
+summary(mod_growthRate)
+coefplot(mod_growthRate)+theme_bw()
 #Europe USA
 # mod_lineage_size = lm(log(tlSize)~penA+mtr+sexDistribution+locations+sexDistribution:locations, data = total_data_large_scale)
 # summary(mod_lineage_size)
@@ -543,7 +558,36 @@ coefplot(mod_growthRate)+theme_bw()
 
 ```
 
+#### *mtrD*
+
+##### Norway and Australia
+
+```{r, echo=FALSE, include = T}
+mod_growthRate = lm(GrowthRate~mtr+sexDistribution+locations, data = total_data_small_scale)
+summary(mod_growthRate)
+coefplot(mod_growthRate)+theme_bw()
+```
+
+##### Europe and USA
+
+```{r, echo=FALSE, include = T}
+mod_growthRate = lm(GrowthRate~mtr+sexDistribution+locations, data = total_data_large_scale)
+summary(mod_growthRate)
+coefplot(mod_growthRate)+theme_bw()
+```
+
+
 ```{r, echo=FALSE, include = F}
+#library(bannerCommenter)
+#bannerCommenter::banner("OLD CODE")
+
+
+##################################################################
+##                           OLD CODE                           ##
+##################################################################
+
+
+
 # library(svglite)
 # g1 = ggplot(total_data, aes(x=sexDistribution, y=GrowthRate, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Growth rate")+theme(legend.position = "none")
 # g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=GrowthRate,color=locations))+theme(legend.position = "none")
