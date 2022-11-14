@@ -16,8 +16,7 @@ output:
 knitr::opts_chunk$set(echo = FALSE, warning=FALSE, collapse=T, cache=T, 'styler', tidy.opts=list(strict=T))
 ```
 
-```{r loading_global_environment, echo=FALSE, include=FALSE}
-
+```{r loading files needed for script, echo=FALSE, include=FALSE}
 #   ____________________________________________________________________________
 #   Analysis                                                                ####
 
@@ -54,7 +53,10 @@ Result_EUR=LineageHomology::reorder_LH(Result_EUR)
 
 #   ____________________________________________________________________________
 #   Set up treeclusters: Focus on the 20 largest from each location         ####
-result = Result_NOR
+
+```
+ 
+```{r script specific functions, echo=FALSE, include=FALSE}
 clusters_and_times = function(result,main_tree,larger_than=10) {
   
   tree_clusters = list()
@@ -77,7 +79,9 @@ neg_sizes = function(cluster_times) {
   for(i in 1:length(cluster_times$time_shifts)) {
     tree_temp = cluster_times$clusters[[i]]
     class(tree_temp) = "phylo"
-    neg_size_clusters[[i]]=skygrowth.map(tree_temp)
+    #Estimate 1 Ne for every 1 year
+    n_intervals = floor(max(nodeHeights(tree_temp))/1)
+    neg_size_clusters[[i]]=skygrowth.map(tree_temp, res=n_intervals, maxiter=400)
   }
   neg_size_clusters
 }
@@ -106,66 +110,8 @@ skygrowth_multiplot = function(neg_sizes,root_date,time_shift_list,xlimits, logy
   do.call("grid.arrange", c(c1, ncol=nCol))
 }
 
-#Results for Norway
-cluster_times_NOR = clusters_and_times(Result_NOR, main_tree = tree)
-#neg_sizes_NOR = neg_sizes(cluster_times_NOR)
-#save(neg_sizes_NOR,file=paste0(path_results,"neg_NOR.Rdata"))
-load(file=paste0(path_results,"neg_NOR.Rdata"))
-# pdf(paste0(path_results,"neg_NOR_top20.pdf"),width=15,height=15)
-# skygrowth_multiplot(neg_sizes_NOR,root_date=1750, time_shift_list=cluster_times_NOR$time_shifts,xlimits=2010, logy=F)
-# dev.off()
-# pdf(paste0(path_results,"neg_NOR_top20_full_timeline.pdf"),width=15,height=15)
-# skygrowth_multiplot(neg_sizes_NOR,root_date=1750, time_shift_list=cluster_times_NOR$time_shifts,xlimits=NA, logy=F)
-# dev.off()
 
-
-#Results for AUSTRALIA
-cluster_times_AUS = clusters_and_times(Result_AUS, main_tree = tree)
-#neg_sizes_AUS = neg_sizes(cluster_times_AUS)
-#save(neg_sizes_AUS,file=paste0(path_results,"neg_AUS.Rdata"))
-load(file=paste0(path_results,"neg_AUS.Rdata"))
-# pdf(paste0(path_results,"neg_AUS_top20.pdf"),width=15,height=15)
-# skygrowth_multiplot(neg_sizes_AUS,root_date=1750, time_shift_list=cluster_times_AUS$time_shifts,xlimits=2010, logy=F)
-# dev.off()
-# pdf(paste0(path_results,"neg_AUS_top20_full_timeline.pdf"),width=15,height=15)
-# skygrowth_multiplot(neg_sizes_AUS,root_date=1750, time_shift_list=cluster_times_AUS$time_shifts,xlimits=NA, logy=F)
-# dev.off()
-
-#Results for USA
-cluster_times_USA = clusters_and_times(Result_USA, main_tree = tree)
-#neg_sizes_USA = neg_sizes(cluster_times_USA)
-#save(neg_sizes_USA,file=paste0(path_results,"neg_USA.Rdata"))
-load(file=paste0(path_results,"neg_USA.Rdata"))
-# pdf(paste0(path_results,"neg_USA_top20.pdf"),width=15,height=15)
-# skygrowth_multiplot(neg_sizes_USA,root_date=1750, time_shift_list=cluster_times_USA$time_shifts,xlimits=2010, logy=F)
-# dev.off()
-# pdf(paste0(path_results,"neg_USA_top20_full_timeline.pdf"),width=15,height=15)
-# skygrowth_multiplot(neg_sizes_USA,root_date=1750, time_shift_list=cluster_times_USA$time_shifts,xlimits=NA, logy=F)
-# dev.off()
-
-#Results for Europe
-cluster_times_EUR = clusters_and_times(Result_EUR, main_tree = tree)
-#neg_sizes_EUR = neg_sizes(cluster_times_EUR)
-#save(neg_sizes_EUR,file=paste0(path_results,"neg_EUR.Rdata"))
-load(file=paste0(path_results,"neg_EUR.Rdata"))
-# pdf(paste0(path_results,"neg_USA_top20.pdf"),width=15,height=15)
-#skygrowth_multiplot(neg_sizes_EUR,root_date=1750, time_shift_list=cluster_times_EUR$time_shifts,xlimits=2010, logy=F)
-# dev.off()
-# pdf(paste0(path_results,"neg_USA_top20_full_timeline.pdf"),width=15,height=15)
-# skygrowth_multiplot(neg_sizes_USA,root_date=1750, time_shift_list=cluster_times_USA$time_shifts,xlimits=NA, logy=F)
-# dev.off()
-
-#Notes: Sampling is different between the locations
-#The Australian collection, sampling stops in 2017 and starts in 2016 + some few genomes in 2004
-#For USA there are a few samples from 1997, some from 2009, 2010, and the main bulk from 2016-2018, 2017 has much less than the neighboring years. 
-#Thus we might extract the average growth rate in the period 2015-2017 for Australia, 2013-2018 for Norway, and  2009-2019 for USA? 
-
-
-#   ___________________________________________________________________________________________
-#   Can the growth rate be explained by explanatory variables such as sex distribution       ####
-
-
-return_growth_interval=function(clusterwise_output, period=c(2010,2017), shift_time=1750,time_shift_list) {
+return_growth_interval=function(clusterwise_output, period=c(2000,2017), shift_time=1750,time_shift_list) {
   ncluster = length(clusterwise_output)
   average_growth_rate = c()
   for(i in 1:ncluster){
@@ -176,13 +122,6 @@ return_growth_interval=function(clusterwise_output, period=c(2010,2017), shift_t
   } 
   return(average_growth_rate)
 }
-
-#Extract the growth rates on the intervals 2014-2017: This may not be meaningful. 
-r_NOR = return_growth_interval(clusterwise_output=neg_sizes_NOR, time_shift_list=cluster_times_NOR)
-r_AUS = return_growth_interval(clusterwise_output=neg_sizes_AUS, time_shift_list=cluster_times_AUS)
-r_USA = return_growth_interval(clusterwise_output=neg_sizes_USA, time_shift_list=cluster_times_USA)
-r_EUR = return_growth_interval(clusterwise_output=neg_sizes_EUR, time_shift_list=cluster_times_EUR)
-r_all = c(r_NOR,r_AUS,r_USA,r_EUR)
 
 
 find_lineage_age = function(result, larger_than) {
@@ -235,13 +174,79 @@ define_explanatory_variables = function(result, larger_than) {
   return(d1)
 }
 
+
+```
+ 
+```{r Analysis and environment, echo=FALSE, include=FALSE}
+#Results for Norway
+cluster_times_NOR = clusters_and_times(Result_NOR, main_tree = tree)
+# neg_sizes_NOR = neg_sizes(cluster_times_NOR)
+# save(neg_sizes_NOR,file=paste0(path_results,"neg_NOR.Rdata"))
+load(file=paste0(path_results,"neg_NOR.Rdata"))
+# pdf(paste0(path_results,"neg_NOR_top20.pdf"),width=15,height=15)
+# skygrowth_multiplot(neg_sizes_NOR,root_date=1750, time_shift_list=cluster_times_NOR$time_shifts,xlimits=2010, logy=F)
+# dev.off()
+# pdf(paste0(path_results,"neg_NOR_top20_full_timeline.pdf"),width=15,height=15)
+# skygrowth_multiplot(neg_sizes_NOR,root_date=1750, time_shift_list=cluster_times_NOR$time_shifts,xlimits=NA, logy=F)
+# dev.off()
+
+
+#Results for AUSTRALIA
+cluster_times_AUS = clusters_and_times(Result_AUS, main_tree = tree)
+# neg_sizes_AUS = neg_sizes(cluster_times_AUS)
+# save(neg_sizes_AUS,file=paste0(path_results,"neg_AUS.Rdata"))
+load(file=paste0(path_results,"neg_AUS.Rdata"))
+# pdf(paste0(path_results,"neg_AUS_top20.pdf"),width=15,height=15)
+# skygrowth_multiplot(neg_sizes_AUS,root_date=1750, time_shift_list=cluster_times_AUS$time_shifts,xlimits=2010, logy=F)
+# dev.off()
+# pdf(paste0(path_results,"neg_AUS_top20_full_timeline.pdf"),width=15,height=15)
+# skygrowth_multiplot(neg_sizes_AUS,root_date=1750, time_shift_list=cluster_times_AUS$time_shifts,xlimits=NA, logy=F)
+# dev.off()
+
+#Results for USA
+cluster_times_USA = clusters_and_times(Result_USA, main_tree = tree)
+# neg_sizes_USA = neg_sizes(cluster_times_USA)
+# save(neg_sizes_USA,file=paste0(path_results,"neg_USA.Rdata"))
+load(file=paste0(path_results,"neg_USA.Rdata"))
+# pdf(paste0(path_results,"neg_USA_top20.pdf"),width=15,height=15)
+# skygrowth_multiplot(neg_sizes_USA,root_date=1750, time_shift_list=cluster_times_USA$time_shifts,xlimits=2010, logy=F)
+# dev.off()
+# pdf(paste0(path_results,"neg_USA_top20_full_timeline.pdf"),width=15,height=15)
+# skygrowth_multiplot(neg_sizes_USA,root_date=1750, time_shift_list=cluster_times_USA$time_shifts,xlimits=NA, logy=F)
+# dev.off()
+
+#Results for Europe
+cluster_times_EUR = clusters_and_times(Result_EUR, main_tree = tree)
+# neg_sizes_EUR = neg_sizes(cluster_times_EUR)
+# save(neg_sizes_EUR,file=paste0(path_results,"neg_EUR.Rdata"))
+load(file=paste0(path_results,"neg_EUR.Rdata"))
+# pdf(paste0(path_results,"neg_USA_top20.pdf"),width=15,height=15)
+#skygrowth_multiplot(neg_sizes_EUR,root_date=1750, time_shift_list=cluster_times_EUR$time_shifts,xlimits=2010, logy=F)
+# dev.off()
+# pdf(paste0(path_results,"neg_USA_top20_full_timeline.pdf"),width=15,height=15)
+# skygrowth_multiplot(neg_sizes_USA,root_date=1750, time_shift_list=cluster_times_USA$time_shifts,xlimits=NA, logy=F)
+# dev.off()
+
+#Notes: Sampling is different between the locations
+#The Australian collection, sampling stops in 2017 and starts in 2016 + some few genomes in 2004
+#For USA there are a few samples from 1997, some from 2009, 2010, and the main bulk from 2016-2018, 2017 has much less than the neighboring years. 
+#Thus we might extract the average growth rate in the period 2015-2017 for Australia, 2013-2018 for Norway, and  2009-2019 for USA? 
+
+
+#   ___________________________________________________________________________________________
+#   Can the growth rate be explained by explanatory variables such as sex distribution       ####
+
+#Extract the growth rates on the intervals 2014-2017: This may not be meaningful. 
+r_NOR = return_growth_interval(clusterwise_output=neg_sizes_NOR, time_shift_list=cluster_times_NOR)
+r_AUS = return_growth_interval(clusterwise_output=neg_sizes_AUS, time_shift_list=cluster_times_AUS)
+r_USA = return_growth_interval(clusterwise_output=neg_sizes_USA, time_shift_list=cluster_times_USA)
+r_EUR = return_growth_interval(clusterwise_output=neg_sizes_EUR, time_shift_list=cluster_times_EUR)
+r_all = c(r_NOR,r_AUS,r_USA,r_EUR)
+
 d1 = define_explanatory_variables(Result_NOR,larger_than=10)
 d2 = define_explanatory_variables(Result_AUS,larger_than=10)
 d3 = define_explanatory_variables(Result_USA,larger_than=10)
 d4 = define_explanatory_variables(Result_EUR,larger_than=10)
-
-
-
 
 
 #Gather data
@@ -256,7 +261,7 @@ colnames(total_data)= c("GrowthRate","locations", "tlSize","penA","mtr", "sexDis
 
 ```
 
-## **Research question: **
+## **Research question** 
 
 Is the growth and size of transmission lineages in the time period 2010-2017 dependent on any of the explanatory variables: Sex distribution in the clade, mtrD status, penA status, or final lineage size (transmission lineage size)?.
 
@@ -348,6 +353,12 @@ The dataset now looks like
 
 ```{r, echo=FALSE}
 head(total_data)
+noquote("")
+
+```
+With the structures 
+```{r, echo=FALSE}
+print("")
 str(total_data)
 
 ```
@@ -406,62 +417,92 @@ total_data_large_scale = total_data_modified[which(total_data_modified[,"locatio
 
 ```
 
-## Epifactors alone
+## Modeling the drivers of lineage growth rate
+
+### Norway versus Australia
+
+#### The effect of location
 
 ```{r, echo=FALSE, include = T}
 #Lineage size and growth on location
-mod_lineage_size = lm(log(tlSize)~locations+lineage_age, data = total_data_small_scale)
-summary(mod_lineage_size)
-coefplot(mod_lineage_size)+theme_bw()
-plot(x=predict(mod_lineage_size), y=total_data_small_scale$tlSize)
+# mod_lineage_size = lm(log(tlSize)~locations+lineage_age, data = total_data_small_scale)
+# summary(mod_lineage_size)
+# coefplot(mod_lineage_size)+theme_bw()
+# plot(x=predict(mod_lineage_size), y=total_data_small_scale$tlSize)
 
 mod_lineage_size = lm(GrowthRate~locations, data = total_data_small_scale)
 summary(mod_lineage_size)
 coefplot(mod_lineage_size)+theme_bw()
 
-mod_lineage_size = lm(log(tlSize)~sexDistribution, data = total_data_small_scale)
-summary(mod_lineage_size)
-coefplot(mod_lineage_size)+theme_bw()
+```
+ 
+#### Observed gender distribution in the TL
+
+```{r, echo=FALSE, include = T}
+# mod_lineage_size = lm(log(tlSize)~sexDistribution, data = total_data_small_scale)
+# summary(mod_lineage_size)
+# coefplot(mod_lineage_size)+theme_bw()
 
 mod_lineage_size = lm(GrowthRate~sexDistribution, data = total_data_small_scale)
 summary(mod_lineage_size)
 coefplot(mod_lineage_size)+theme_bw()
 
 
-mod_lineage_size = lm(log(tlSize)~locations, data = total_data_large_scale)
-summary(mod_lineage_size)
-coefplot(mod_lineage_size)+theme_bw()
+```
+ 
+### Europe versus USA
+ 
+#### The effect of location
+
+```{r, echo=FALSE, include = T}
+# mod_lineage_size = lm(log(tlSize)~locations, data = total_data_large_scale)
+# summary(mod_lineage_size)
+# coefplot(mod_lineage_size)+theme_bw()
 
 mod_lineage_size = lm(GrowthRate~locations, data = total_data_large_scale)
 summary(mod_lineage_size)
 coefplot(mod_lineage_size)+theme_bw()
 
-mod_lineage_size = lm(log(tlSize)~sexDistribution, data = total_data_large_scale)
-summary(mod_lineage_size)
-coefplot(mod_lineage_size)+theme_bw()
+# mod_lineage_size = lm(log(tlSize)~sexDistribution, data = total_data_large_scale)
+# summary(mod_lineage_size)
+# coefplot(mod_lineage_size)+theme_bw()
 
+
+```
+ 
+#### Observed gender distribution in the TL
+ 
+```{r, echo=FALSE, include = T}
 mod_lineage_size = lm(GrowthRate~sexDistribution, data = total_data_large_scale)
 summary(mod_lineage_size)
 coefplot(mod_lineage_size)+theme_bw()
 
 ```
 
-## Epifactors with interaction terms
+## Growthrate modeled by gender distribution and location and interaction
+
+### Europe versus USA
 
 ```{r, echo=FALSE, include = T}
-#Lineage size and growth rate on epifactors
-mod_lineage_size = lm(log(tlSize)~sexDistribution+locations+sexDistribution*locations, data = total_data_small_scale)
-summary(mod_lineage_size)
-coefplot(mod_lineage_size)+theme_bw()
+# #Lineage size and growth rate on epifactors
+# mod_lineage_size = lm(log(tlSize)~sexDistribution+locations+sexDistribution*locations, data = total_data_small_scale)
+# summary(mod_lineage_size)
+# coefplot(mod_lineage_size)+theme_bw()
 
-mod_lineage_size = lm(log(tlSize)~sexDistribution+locations+sexDistribution*locations, data = total_data_large_scale)
-summary(mod_lineage_size)
-coefplot(mod_lineage_size)+theme_bw()
-
+# mod_lineage_size = lm(log(tlSize)~sexDistribution+locations+sexDistribution*locations, data = total_data_large_scale)
+# summary(mod_lineage_size)
+# coefplot(mod_lineage_size)+theme_bw()
 
 mod_lineage_size = lm(GrowthRate~sexDistribution+locations+sexDistribution*locations, data = total_data_small_scale)
 summary(mod_lineage_size)
 coefplot(mod_lineage_size)+theme_bw()
+
+
+```
+
+### Norway versus Australia
+
+```{r, echo=FALSE, include = T}
 
 mod_lineage_size = lm(GrowthRate~sexDistribution+locations+sexDistribution*locations, data = total_data_large_scale)
 summary(mod_lineage_size)
@@ -470,80 +511,57 @@ coefplot(mod_lineage_size)+theme_bw()
 
 ```
 
+## Growthrate modeled by penA+mtr+sexDistribution+locations+sexDistribution:locations
+
 ```{r, echo=FALSE, include = T}
 #Lineage size and growth on sex
 
 #With mtr and penA etc. 
 
-mod_lineage_size = lm(log(tlSize)~penA+mtr+sexDistribution+locations+sexDistribution:locations, data = total_data_small_scale)
-summary(mod_lineage_size)
-coefplot(mod_lineage_size)+theme_bw()
+# mod_lineage_size = lm(log(tlSize)~penA+mtr+sexDistribution+locations+sexDistribution:locations, data = total_data_small_scale)
+# summary(mod_lineage_size)
+# coefplot(mod_lineage_size)+theme_bw()
 
 mod_growthRate = lm(log(GrowthRate)~penA+mtr+sexDistribution+locations+sexDistribution:locations, data = total_data_small_scale)
 summary(mod_growthRate)
 coefplot(mod_growthRate)+theme_bw()
 
 #Europe USA
-mod_lineage_size = lm(log(tlSize)~penA+mtr+sexDistribution+locations+sexDistribution:locations, data = total_data_large_scale)
-summary(mod_lineage_size)
-coefplot(mod_lineage_size)+theme_bw()
+# mod_lineage_size = lm(log(tlSize)~penA+mtr+sexDistribution+locations+sexDistribution:locations, data = total_data_large_scale)
+# summary(mod_lineage_size)
+# coefplot(mod_lineage_size)+theme_bw()
+
+# 
+# mod_growthRate = lm(log(GrowthRate)~-1+penA+mtr+sexDistribution+locations+sexDistribution:locations, data = total_data_large_scale)
+# summary(mod_growthRate)
+# coefplot(mod_growthRate)+theme_bw()
 
 
-mod_growthRate = lm(log(GrowthRate)~-1+penA+mtr+sexDistribution+locations+sexDistribution:locations, data = total_data_large_scale)
-summary(mod_growthRate)
-coefplot(mod_growthRate)+theme_bw()
-
-
-mod_lineage_size = lm(log(tlSize)~sexDistribution+locations+sexDistribution:locations,data = total_data_large_scale)
-summary(mod_lineage_size)
-coefplot(mod_lineage_size)+theme_bw()
-
-```
-
-```{r, echo=FALSE, include = F}
-
-mod_total = lm(r_all~factor(penA)+factor(mtr)+sexDistribution, data = total_data); summary(mod_total)
-
-
-#plot(mod_total)
-
-#plot(mod_total)
-mod1 = lm(lineage_size~factor(penA_variable)+factor(mtr_variable)+sex_variable, data = d1)
-mod2 = lm(lineage_size~factor(penA_variable)+factor(mtr_variable)+sex_variable, data = d2)
-mod3 = lm(lineage_size~factor(penA_variable)+factor(mtr_variable)+sex_variable, data = d3)
-
-#plot(mod1)
-
-summary(mod1);
-summary(mod2);
-summary(mod3)
-
-#Use functions from the app script to extract explanatory variables.
-# mtrD(Result,larger_than = input$largerthan)
-# t1 = sex_distributions(Result,larger_than = input$largerthan)
-# penA_mosaic_distribution(Result,larger_than = input$largerthan)
+# mod_lineage_size = lm(log(tlSize)~sexDistribution+locations+sexDistribution:locations,data = total_data_large_scale)
+# summary(mod_lineage_size)
+# coefplot(mod_lineage_size)+theme_bw()
 
 ```
 
 ```{r, echo=FALSE, include = F}
-library(svglite)
-g1 = ggplot(total_data, aes(x=sexDistribution, y=GrowthRate, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Growth rate")+theme(legend.position = "none")
-g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=GrowthRate,color=locations))+theme(legend.position = "none")
-g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=GrowthRate))+ylab("Growth rate")
-g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=GrowthRate))+ylab("Growth rate")
-
-#svglite(file=paste0(path_final_figures,"GrowthRates_on_metadata.svg"))
-grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
-#dev.off()
-
-
-g1 = ggplot(total_data,aes(x=sexDistribution, y=tlSize, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Transmission lineage size")+theme(legend.position="none")
-g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=tlSize,color=locations))+theme(legend.position = "none")+ylab("Transmission lineage size")+scale_y_log10()
-g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=tlSize))+ylab("Transmission lineage size")+scale_y_log10()
-g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=tlSize))+ylab("Transmission lineage size")+scale_y_log10()
-
-#svglite(file=paste0(path_final_figures,"TLSize_on_metadata.svg"))
-grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
-#dev.off()
+# library(svglite)
+# g1 = ggplot(total_data, aes(x=sexDistribution, y=GrowthRate, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Growth rate")+theme(legend.position = "none")
+# g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=GrowthRate,color=locations))+theme(legend.position = "none")
+# g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=GrowthRate))+ylab("Growth rate")
+# g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=GrowthRate))+ylab("Growth rate")
+# 
+# #svglite(file=paste0(path_final_figures,"GrowthRates_on_metadata.svg"))
+# grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
+# #dev.off()
+# 
+# 
+# g1 = ggplot(total_data,aes(x=sexDistribution, y=tlSize, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Transmission lineage size")+theme(legend.position="none")
+# g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=tlSize,color=locations))+theme(legend.position = "none")+ylab("Transmission lineage size")+scale_y_log10()
+# g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=tlSize))+ylab("Transmission lineage size")+scale_y_log10()
+# g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=tlSize))+ylab("Transmission lineage size")+scale_y_log10()
+# 
+# #svglite(file=paste0(path_final_figures,"TLSize_on_metadata.svg"))
+# grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
+# #dev.off()
 
 ```
