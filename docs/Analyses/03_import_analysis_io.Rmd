@@ -9,6 +9,7 @@ title: Import, export and local transmission
 output:
     html_document:
         toc: true
+        toc_float: TRUE
         theme: united
 ---
 
