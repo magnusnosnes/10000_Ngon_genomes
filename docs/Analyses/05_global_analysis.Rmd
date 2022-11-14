@@ -3,6 +3,7 @@ title: Global Analysis
 output:
     html_document:
         toc: true
+        toc_float: true
         theme: united
  #    knit: (function(input_file, encoding) {
  #  out_dir <- '.';
