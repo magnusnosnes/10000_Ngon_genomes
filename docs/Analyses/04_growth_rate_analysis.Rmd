@@ -392,14 +392,16 @@ str(total_data)
 
 ## The relation of the growth rates and sizes of the transmission lineages to metadata
 
+Here we investigate the growth rate and size of the transmission lineages, and the relation of these to the explanatory variables: penA, mtrD, sex distribution and location.
+
+### Growth rate
+
 ```{r, echo=FALSE, include = T}
 library(grid)
 g2 = ggplot(total_data)+theme_bw()+geom_point(aes(x=tlSize, y=GrowthRate,color=locations))+theme(legend.position = c(0.8,0.8))+ylab("Growth rate")+xlab("Transmission lineage size")
 g2
 
 ```
-
-Here we investigate the growth rate and size of the transmission lineages, and the relation of these to the explanatory variables: penA, mtrD, sex distribution and location.
 
 ```{r, echo=FALSE, include = T, warning=F, message=F}
 g1 = ggplot(total_data, aes(x=sexDistribution, y=GrowthRate, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Growth rate")+theme(legend.position = "none")+geom_smooth(method="lm",alpha=0.15)
@@ -409,7 +411,7 @@ g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=GrowthRate))+ylab(
 grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
 ```
 
-Lineage size versus variables explanatory variables
+### Size of the transmission lineages
 
 ```{r, echo=FALSE, include = T, warning=F, message=F}
 g1 = ggplot(total_data,aes(x=sexDistribution, y=tlSize, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Transmission lineage size")+theme(legend.position="none")+geom_smooth(method="lm", alpha=0.15)
@@ -430,9 +432,7 @@ total_data_modified$mtr[total_data_modified$mtr!="non-mosaic"]="mosaic"
 total_data_modified$mtr[total_data_modified$mtr=="semi-mosaic"]="mosaic"
 ```
 
-Doing the analyses individually for Norway/Australia, and Europe/USA. For the regression analyses we first consider epifactors alone: location and sex distribution (fraction M/(M+F)) and the interaction of these. We perform the comparisons for Norway versus Australia and Europe versus the USA - since these geographical regions are of more similar sizes. We run the regressions with 1. both factors included 2. one regression for each factor alone.
 
-Next we look at the effects of mtr and penA variants. Since we believe location and sexDistribution to be important, we keep these in the model and their interaction
 
 ```{r, echo=FALSE, include = T}
 #Pairwise comparisons between Norway and Australia and Europe and USA
@@ -444,6 +444,8 @@ total_data_large_scale = total_data_modified[which(total_data_modified[,"locatio
 ```
 
 ## Modeling the drivers of lineage growth rate
+
+We do all the analyses individually for Norway/Australia, and Europe/USA. For the regression analyses we first consider epifactors alone: location and sex distribution (fraction M/(M+F)) and the interaction of these. We perform the comparisons for Norway versus Australia and Europe versus the USA - since these geographical regions are of more similar sizes.
 
 ### The effect of location
 
@@ -538,6 +540,8 @@ coefplot(mod_lineage_size)+theme_bw()
 ```
 
 ## The effects of *penA* and *mtrD*
+
+Next we look at the effects of mtr and penA variants. Since we believe location and gender distribution to be important in the spread of gonorrhoeae, we keep these in the model when studying the effects of *penA* and *mtrD*
 
 ### *penA*
 
