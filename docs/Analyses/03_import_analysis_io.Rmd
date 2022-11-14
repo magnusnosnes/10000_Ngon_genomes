@@ -18,7 +18,6 @@ output:
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, collapse=T, cache=T, 'styler', tidy.opts=list(strict=T))
 ```
 
-# Import and local transmission analysis
 
 ```{r, include=FALSE}
 #Load required packages and local variables
