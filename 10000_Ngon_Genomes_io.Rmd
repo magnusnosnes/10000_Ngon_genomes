@@ -46,5 +46,6 @@ This analysis explores the relation of the growth rate of effective population s
 
 [<img src="Files/Global_analysis.png" width="500"/>](Analyses/05_global_analysis.html)
 
-This analysis does not define clades based on the concept of transmission lineages as above, but instead focuses on large clades defined by metadata such as the genes: mtr mosaic and penA mosaic, MIC category (high or low), and sex distribution. We describe the effective population size dynamics in the large clades and relate this to the metadata. 
+
+This section displays the full phylogenetic tree and associated metadata. Here we define important clades based on the observed metadata and phylogeny. The "important clades" display specific variants of the genes *mtr* and *penA* MIC category (high or low), which is known to be important for azitromycin and cephalosporin resistance. We estimate the effective population size dynamics to determine the growth of these clades in recent time. 
 
