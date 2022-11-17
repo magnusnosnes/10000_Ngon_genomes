@@ -404,24 +404,43 @@ g2
 ```
 
 ```{r, echo=FALSE, include = T, warning=F, message=F}
-g1 = ggplot(total_data, aes(x=sexDistribution, y=GrowthRate, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Growth rate")+theme(legend.position = "none")+geom_smooth(method="lm",alpha=0.15)
+g1 = ggplot(total_data, aes(x=sexDistribution, y=GrowthRate, color=locations, fill=locations))+theme_bw()+
+  geom_point()+ylab("Growth rate")+theme(legend.position = "none")+
+  ylim(c(0,5))
+g1
+
+```
+ 
+```{r, echo=FALSE, include = T, warning=F, message=F, fig.width=8,fig.height=8}
 g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=GrowthRate,color=locations))+theme(legend.position = "none")
 g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=GrowthRate))+ylab("Growth rate")
 g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=GrowthRate))+ylab("Growth rate")
-grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
+grid.arrange(g2,g3,g4,nrow=3,ncol=1)
+
 ```
 
-### Size of the transmission lineages
 
-```{r, echo=FALSE, include = T, warning=F, message=F}
-g1 = ggplot(total_data,aes(x=sexDistribution, y=tlSize, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Transmission lineage size")+theme(legend.position="none")+geom_smooth(method="lm", alpha=0.15)
+
+
+
+
+
+<!--  ### Size of the transmission lineages
+
+```{r, echo=FALSE, include = T, warning=F, message=F, }
+g1 = ggplot(total_data,aes(x=sexDistribution, y=tlSize, color=locations, fill=locations))+theme_bw()+geom_point()+ylab("Transmission lineage size")+theme(legend.position="none")
+#+geom_smooth(method="lm", alpha=0.15)
+```
+ 
+```{r, echo=FALSE, include = T, warning=F, message=F, fig.width=8,fig.height=8}
 g2 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=locations, y=tlSize,color=locations))+theme(legend.position = "none")+ylab("Transmission lineage size")
 g3 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=mtr, y=tlSize))+ylab("Transmission lineage size")
 g4 = ggplot(total_data)+theme_bw()+geom_boxplot(aes(x=penA, y=tlSize))+ylab("Transmission lineage size")
-grid.arrange(g1,g2,g3,g4,nrow=2,ncol=2)
+grid.arrange(g2,g3,g4,nrow=3,ncol=1)
 
 #boxplot(total_data$GrowthRate~as.factor(total_data$locations),ylab="Growth Rate", xlab="Transmission lineage size")
 ```
+--> 
 
 ```{r, echo=FALSE, include = F}
 total_data_modified = total_data #Modfied version of data
@@ -443,6 +462,7 @@ total_data_large_scale = total_data_modified[which(total_data_modified[,"locatio
 
 ```
 
+ 
 ## Modeling the drivers of lineage growth rate
 
 We do all the analyses individually for Norway/Australia, and Europe/USA. For the regression analyses we first consider epifactors alone: location and sex distribution (fraction M/(M+F)) and the interaction of these. We perform the comparisons for Norway versus Australia and Europe versus the USA - since these geographical regions are of more similar sizes.
@@ -603,6 +623,26 @@ mod_growthRate = lm(GrowthRate~mtr+sexDistribution+locations, data = total_data_
 summary(mod_growthRate)
 coefplot(mod_growthRate)+theme_bw()
 ```
+
+
+## Full model with location, gender distribution, *mtr* and *penA* 
+
+### Norway and Australia
+
+```{r, echo=FALSE, include = T}
+mod_growthRate = lm(GrowthRate~mtr+penA+sexDistribution+locations, data = total_data_small_scale)
+summary(mod_growthRate)
+coefplot(mod_growthRate)+theme_bw()
+```
+
+### Europe and USA
+
+```{r, echo=FALSE, include = T}
+mod_growthRate = lm(GrowthRate~mtr+penA+sexDistribution+locations, data = total_data_large_scale)
+summary(mod_growthRate)
+coefplot(mod_growthRate)+theme_bw()
+```
+
 
 ```{r, echo=FALSE, include = F}
 #library(bannerCommenter)
