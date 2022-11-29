@@ -1,5 +1,5 @@
 ---
-title: # Metadata and effective population size analysis
+title: Metadata and effective population size analysis
 output:
     html_document:
         toc: true

@@ -32,7 +32,8 @@ library(phylodyn)
 library(coefplot)
 
 #Notes:
-#Had to install an older version of RcppArmadillo to get the script running
+# Had to install an older version of RcppArmadillo to get the script running
+# Another thing to try: Could also group small scale and large scale together with a common factor. 
 #"install.packages("https://cran.r-project.org/src/contrib/Archive/RcppArmadillo/RcppArmadillo_0.9.900.3.0.tar.gz", repos=NULL, type="source")"
 
 #Setup paths
@@ -587,7 +588,7 @@ coefplot(mod_growthRate)+theme_bw()
 
 ```{r, echo=FALSE, include = T}
 
-mod_growthRate = lm(log(GrowthRate)~penA+sexDistribution+locations, data = total_data_large_scale)
+mod_growthRate = lm(GrowthRate~penA+sexDistribution+locations, data = total_data_large_scale)
 summary(mod_growthRate)
 coefplot(mod_growthRate)+theme_bw()
 #Europe USA
