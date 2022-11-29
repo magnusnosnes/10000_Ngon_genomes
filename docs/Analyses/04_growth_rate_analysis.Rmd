@@ -44,10 +44,11 @@ path_final_figures = "~/Dropbox/10000_Lovers/01_LineageHomology/99_Figures_for_p
 source("~/Dropbox/10000_Lovers/01_LineageHomology/sourcefunctions/environment_variables.R")
 load(file=paste0(path_data,"Result_EUR.Rdata"))
 Result_EUR=LineageHomology::reorder_LH(Result_EUR)
+
 #RQ: Does meta-data explain the growth-rate of the biggest clades in period 2015-2018?
 #1: Run Skygrowth on each TL.
 #2: Extract clade wise growth-rate.
-#3: Define explanatory variables for each clade: 
+#3: Define explanatory variables for each clade. 
 #4: Regress the growth rates on the metadata.
 
 
