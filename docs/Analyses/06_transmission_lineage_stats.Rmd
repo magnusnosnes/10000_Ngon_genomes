@@ -1,0 +1,227 @@
+---
+# knit: (function(input_file, encoding) {
+#   out_dir <- '.';
+#   rmarkdown::render(input_file,
+#  encoding=encoding,
+#  output_file=file.path(dirname(input_file), out_dir, 'Growth_rates_explanatory.html'))})
+title: Transmission lineage statistics
+output:
+    html_document:
+        toc: true
+        toc_float: true
+        theme: united
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, collapse=T, cache=T, 'styler', tidy.opts=list(strict=T))
+```
+
+```{r loading files needed for script, echo=FALSE, include=FALSE}
+#   ____________________________________________________________________________
+#   Analysis                                                                ####
+
+
+library(ape)
+library(LineageHomology)
+library(skygrowth)
+library(grid)
+library(scales) #Make more axis ticks.
+library(gridExtra)
+library(ggplot2)
+library(phylodyn)
+library(coefplot)
+
+#Notes:
+# Had to install an older version of RcppArmadillo to get the script running
+# Another thing to try: Could also group small scale and large scale together with a common factor. 
+#"install.packages("https://cran.r-project.org/src/contrib/Archive/RcppArmadillo/RcppArmadillo_0.9.900.3.0.tar.gz", repos=NULL, type="source")"
+
+#Setup paths
+path_main = "~/Dropbox/10000_Lovers/Phylogeography"
+path_data = "~/Dropbox/10000_Lovers/01_LineageHomology/11_saved_data/"
+path_results = "~/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/"
+path_final_figures = "~/Dropbox/10000_Lovers/01_LineageHomology/99_Figures_for_paper/"
+
+source("~/Dropbox/10000_Lovers/01_LineageHomology/sourcefunctions/environment_variables.R")
+load(file=paste0(path_data,"Result_EUR.Rdata"))
+Result_EUR=LineageHomology::reorder_LH(Result_EUR)
+
+#RQ: Does meta-data explain the growth-rate of the biggest clades in period 2015-2018?
+#1: Run Skygrowth on each TL.
+#2: Extract clade wise growth-rate.
+#3: Define explanatory variables for each clade. 
+#4: Regress the growth rates on the metadata.
+
+
+#   ____________________________________________________________________________
+#   Set up treeclusters: Focus on the 20 largest from each location         ####
+
+```
+
+```{r Helper functions, include=F}
+
+#   ____________________________________________________________________________
+#   Functions used in the script goes here:                                 ####
+
+summarize_lineages = function(Result) {
+  # The ten largest lineages account for this % of all observations
+  c1 = round(sum(Result$Lineage_sizes[1:10])/sum(Result$Lineage_sizes)*100,4)
+  # The % of lineages that are singletons
+  c2 = round(sum(Result$Lineage_sizes[Result$Lineage_sizes==1])/sum(Result$Lineage_sizes)*100,4)
+  return(c(c1,c2))
+}
+
+```
+
+## Overview
+Here we provide an summary of some of the important statistics for the transmission lineages. 
+From the [transmission lineage explorer](https://magnunos.shinyapps.io/LineageHomology_Explorer/) it is evident that in all locations: Europe, the USA, Norway and Australia, some transmission lineages account for a disproportionate amount of the sequences observed in the locations. Yet in all locations most transmission lineages are small. Here we compare the different locations in terms of transmission lineage size distributions. 
+
+> It should kept in mind that the size of transmission lineages can be similar, even though they grown in very different ways. For example:  a very old, slow spreading, transmission lineage may have a similar size to a  a young fast spreading
+
+We consider the research questions (RQs):
+
+1. How many % of local cases does the 10 largest lineages explain, and how many are explained by singletons?
+2. How is the lineage sizes distributed? Power law distributions?
+ <!-- 3. Can we summarize other interesting stuff about the lineages? --> 
+
+
+## RQ 1: How many % of local cases does the 10 largest lineages explain, and how many are explained by singletons?
+
+```{r,echo=T}
+
+summarize_lineages = function(Result) {
+  # The ten largest lineages account for this % of all observations
+  c1 = round(sum(Result$Lineage_sizes[1:10])/sum(Result$Lineage_sizes)*100,4)
+  # The % of lineages that are singletons
+  c2 = round(sum(Result$Lineage_sizes[Result$Lineage_sizes==1])/sum(Result$Lineage_sizes)*100,4)
+  return(c(c1,c2))
+}
+
+cNOR = summarize_lineages(Result_NOR)
+cAUS = summarize_lineages(Result_AUS)
+cEUR = summarize_lineages(Result_EUR)
+cUSA = summarize_lineages(Result_USA)
+mat1 = rbind(cNOR, cAUS, cEUR, cUSA)
+colnames(mat1)=c("Percentage of cases explained by 10 largest TL", "Percentage of cases explained by singletons")
+rownames(mat1)=c("Norway", "Australia", "Europe","USA")
+knitr::kable(mat1)
+```
+
+## RQ 2: How is the lineage sizes distributed? Power law distributions?
+
+First we plot the lineage size distributions on normal and log-log scale for each location. 
+
+```{r, fig.height=3,fig.width=8}
+library(igraph)
+library(ggplot2)
+library(gridExtra)
+## Look at size distributions
+ggplot_distribution = function(Result, title="") {
+  x = as.numeric(names(table(Result$Lineage_sizes)))
+  y = as.numeric(table(Result$Lineage_sizes))
+  c1 = data.frame(x=x,y=y)
+  g1 = ggplot()+geom_point(aes(x=x, y=y)) + theme_bw()+ggtitle(title)+ylab("Number of transmission lineages")+xlab("Transmission lineage size")
+  g2 = ggplot()+geom_point(aes(x=log(x), y=log(y))) + theme_bw()+ggtitle("log-log-scaled")
+  return(list("normal"=g1, "log-scaled"=g2))
+}
+plotit = function(ggplot_distribution) {
+  grid.arrange(ggplot_distribution$normal,ggplot_distribution$`log-scaled`, nrow=1)
+}
+NOR = ggplot_distribution(Result_NOR, title="Norway")
+plotit(NOR)
+AUS = ggplot_distribution(Result_AUS, title="Australia")
+plotit(AUS)
+EUR = ggplot_distribution(Result_EUR, title="Europe")
+plotit(EUR)
+USA = ggplot_distribution(Result_USA, title="USA")
+plotit(USA)
+
+
+
+```
+ 
+Next we fit a powerlaw distribution using the fit_power_law function from the igraph R-package. We use the Kolmogorov-Smirnov included in the package test calculate the p-value indicating if the data if significantly different what we expect under a power law distribution with the estimated coefficient.
+ 
+```{r, fig.height=3,fig.width=8, include=T, echo=T}
+powerNOR = fit_power_law(x = Result_NOR$Lineage_sizes, xmin=1)
+powerAUS = fit_power_law(x = Result_AUS$Lineage_sizes, xmin=1)
+powerEUR = fit_power_law(x = Result_EUR$Lineage_sizes, xmin=1)
+powerUSA = fit_power_law(x = Result_USA$Lineage_sizes, xmin=1)
+powerMatrix = rbind(c(powerNOR$alpha,paste(powerNOR$KS.p<0.05)),
+                    c(powerAUS$alpha,paste(powerAUS$KS.p<0.05)),
+                    c(powerEUR$alpha,paste(powerEUR$KS.p<0.05)),
+                    c(powerUSA$alpha,paste(powerUSA$KS.p<0.05)))
+colnames(powerMatrix)=c("Power law coefficient","Reject power law distribution")
+rownames(powerMatrix)=c("Norway", "Australia", "Europe","USA")
+knitr::kable(powerMatrix)
+```
+
+Lastly we compare the fitted power-law distributions to observed lineage size distributions by drawing the same number of transmission lineage sizes from the power law distributions 1000, and comparing the percentiles.  
+
+
+```{r fig.height=3,fig.width=8}
+#
+nreps = 100
+sample_from_power_law = function(Result,alpha) {
+#Draw as many lineage sizes as 
+n = length(Result$Lineage_sizes)
+x_min = 1
+alpha = 2.0
+# Pragmatic approach - making the matrix too large
+x_samples = matrix(NA,nrow=nreps, ncol=300)
+y_samples = matrix(NA,nrow=nreps, ncol=300)
+for(i in 1:nreps){
+  r = runif(n,0,1)
+  x_smp = floor(x_min * (1 - r) ** (-1 / (alpha - 1)))  
+  y = as.numeric(table(x_smp))
+  x = as.numeric(names(table(x_smp)))
+  x_samples[i,1:length(x)]=x
+  y_samples[i,1:length(y)]=y
+}
+return(list("xsamples"=x_samples, "ysamples"=y_samples))
+}
+
+
+
+ggplot_distribution2 = function(Result, title="",alpha=2) {
+  
+  x = as.numeric(names(table(Result$Lineage_sizes)))
+  y = as.numeric(table(Result$Lineage_sizes))
+  c1 = data.frame(x=x,y=y)
+  g1 = ggplot()+geom_point(aes(x=x, y=y)) + theme_bw()+ggtitle(title)+ylab("Number of transmission lineages")+xlab("Transmission lineage size")
+  g2 = ggplot()+geom_point(aes(x=log(x), y=log(y)), col="darkred") + theme_bw()+ggtitle("log-log-scaled")
+  #Draw samples to plot with the data
+  samples = sample_from_power_law(Result,alpha = alpha)
+  
+  x_samples = samples$xsamples
+  y_samples = samples$ysamples
+  
+  xsamples_combined = x_samples[is.na(x_samples)==FALSE]
+  ysamples_combined = y_samples[is.na(y_samples)==FALSE]
+  g2 = g2 + geom_point(aes(x=log(xsamples_combined), y=log(ysamples_combined)),col="lightblue", alpha = 0.3)
+  #Replot the original points to see them better.
+  g2 = g2+geom_point(aes(x=log(x), y=log(y)), col="darkred")
+  #for(i in 1:nrow(x_samples)) {
+  #  g2 = g2+geom_point(aes(x=log(x_samples[i,]), y=log(y_samples[i,])),col="lightblue", alpha = 0.1)
+  #}
+  #g2
+  return(list("normal"=g1, "log-scaled"=g2))
+}
+plotit = function(ggplot_distribution) {
+  grid.arrange(ggplot_distribution$normal,ggplot_distribution$`log-scaled`, nrow=1)
+}
+NOR = ggplot_distribution2(Result_NOR, title="Norway", alpha=powerNOR$alpha)
+plotit(NOR)
+AUS = ggplot_distribution2(Result_AUS, title="Australia",alpha=powerAUS$alpha)
+plotit(AUS)
+EUR = ggplot_distribution2(Result_EUR, title="Europe",alpha=powerEUR$alpha)
+plotit(EUR)
+USA = ggplot_distribution2(Result_USA, title="USA", alpha=powerUSA$alpha)
+plotit(USA)
+
+```
+
+
+
+ <!-- ## RQ 3: Can we summarize other interesting stuff about the lineages? --> 
