@@ -4,14 +4,19 @@ knit: (function(input_file, encoding) {
   rmarkdown::render(input_file,
  encoding=encoding,
  output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
+title: The inter-continental population dynamics of Neisseria gonorrhoeae
+output:
+    prettydoc::html_pretty:
+        theme: architect
+        toc: true
+        includes:
+        in_header: header.txt
+        #toc_float: true
+        #theme: united
+toc-title: "Contents"
 ---
 
-
-
-## *The inter-continental population dynamics of Neisseria gonorrhoeae*
- 
 This page describes a subset of the analyses for the paper *The inter-continental population dynamics of Neisseria gonorrhoeae*. The aim of this project was to investigate the global transmission dynamics of *Neisseria gonorrhoeae* in recent time. To do so we collected a globally diverse set of sequences. The main locations are from Australia (n=2203), Norway (n=1724), the USA (n=2372), but multiple other countries are represented in the remaining sequences (n=3434).
-
 
 ### [Transmission lineages and metadata exploration](https://magnunos.shinyapps.io/LineageHomology_Explorer/?_ga=2.205397328.1370338265.1637693506-226041197.1637248825)
 
