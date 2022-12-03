@@ -21,6 +21,8 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, collapse=T, cac
 
 ```{r, include=FALSE}
 #Load required packages and local variables
+library(devtools)
+devtools::install_github("magnusnosnes/LineageHomology")
 library(ape)
 library(LineageHomology)
 library(skygrowth)
@@ -216,34 +218,32 @@ source("~/Dropbox/Github/10000_Ngon_genomes/R/plot_import_local.R")
 ```{r remedy002, echo=F, include =F}
 
 #Use the 10 first for demonstrating
-# implocexp_NOR = import_export_local_transmission(tree,replicates_NOR[,1:100],start_time=1750,time_interval_size = 1, focal_location = "Norway")
-# save(implocexp_NOR, file=paste0(path_results,"impLocExp_NOR.Rdata"))
+#implocexp_NOR = import_export_local_transmission(tree,replicates_NOR[,1:100],start_time=1750,time_interval_size = 1, focal_location = "Norway")
+#save(implocexp_NOR, file=paste0(path_results,"impLocExp_NOR.Rdata"))
 load(file=paste0(path_results,"impLocExp_NOR.Rdata"))
 
 
-# implocexp_AUS = import_export_local_transmission(tree,replicates_AUS[,1:100],start_time=1750,time_interval_size = 1,focal_location = "Australia")
-# save(implocexp_AUS, file=paste0(path_results,"impLocExp_AUS.Rdata"))
+#implocexp_AUS = import_export_local_transmission(tree,replicates_AUS[,1:100],start_time=1750,time_interval_size = 1,focal_location = "Australia")
+#save(implocexp_AUS, file=paste0(path_results,"impLocExp_AUS.Rdata"))
 load(file=paste0(path_results,"impLocExp_AUS.Rdata"))
 
-# implocexp_USA = import_export_local_transmission(tree,replicates_USA[,1:100],start_time=1750,time_interval_size = 1, focal_location = "A_USA")
-# save(implocexp_USA, file=paste0(path_results,"impLocExp_USA.Rdata"))
+#implocexp_USA = import_export_local_transmission(tree,replicates_USA[,1:100],start_time=1750,time_interval_size = 1, focal_location = "A_USA")
+#save(implocexp_USA, file=paste0(path_results,"impLocExp_USA.Rdata"))
 load(file=paste0(path_results,"impLocExp_USA.Rdata"))
 
-# implocexp_EUR = import_export_local_transmission(tree,replicates_Europe[,1:100],start_time=1750,time_interval_size = 1, focal_location="Europe")
-# save(implocexp_EUR, file=paste0(path_results,"impLocExp_EUR.Rdata"))
+#implocexp_EUR = import_export_local_transmission(tree,replicates_Europe[,1:100],start_time=1750,time_interval_size = 1, focal_location="Europe")
+#save(implocexp_EUR, file=paste0(path_results,"impLocExp_EUR.Rdata"))
 load(file=paste0(path_results,"impLocExp_EUR.Rdata"))
-
 
 ```
 
 Aggregated estimates of import, local transmission and export over the full phylogeny:
 
 ```{r, include=TRUE}
-
-c1 = Summarize_import_export_local_transmission(implocexp_NOR); c1
-c2 = Summarize_import_export_local_transmission(implocexp_AUS); c2
-c3 = Summarize_import_export_local_transmission(implocexp_USA); c3
-c3 = Summarize_import_export_local_transmission(implocexp_EUR); c3
+c1 = Summarize_import_export_local_transmission(implocexp_NOR); round(c1,4)
+c2 = Summarize_import_export_local_transmission(implocexp_AUS); round(c2,4)
+c3 = Summarize_import_export_local_transmission(implocexp_USA); round(c3,4)
+c4 = Summarize_import_export_local_transmission(implocexp_EUR); round(c4,4)
 
 ```
 
