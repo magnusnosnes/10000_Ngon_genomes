@@ -237,7 +237,7 @@ load(file=paste0(path_results,"impLocExp_EUR.Rdata"))
 
 ```
 
-Aggregated estimates of import, local transmission and export over the full phylogeny:
+## Aggregated estimates of import, local transmission and export over the full phylogeny:
 
 ```{r, include=TRUE}
 c1 = Summarize_import_export_local_transmission(implocexp_NOR); round(c1,4)
