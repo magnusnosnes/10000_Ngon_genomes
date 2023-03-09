@@ -760,7 +760,7 @@ find_asymptote = function(result, model_index) {
 
 plot_fit = function(result, model_index, internal_downsampling=F) {
   # Debug
-  result=result_NOR; model_index=best_model_index; internal_downsampling=F
+  #result=result_NOR; model_index=best_model_index; internal_downsampling=F
   
   
   # Load ggplot2 package for plotting 
@@ -799,6 +799,7 @@ plot_fit = function(result, model_index, internal_downsampling=F) {
     if(internal_downsampling){
       dat$exports= 1-dat$exports
     }
+    
     xmax = max(dat$genomes)
      g1 = ggplot(dat, aes(x = dat$genomes, y = dat$exports)) +
        geom_point()+
