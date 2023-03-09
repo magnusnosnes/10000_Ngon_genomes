@@ -53,5 +53,5 @@ This page displays the full phylogenetic tree and associated metadata. Here we d
 
 [<img src="Files/downsampling_analysis.png" width="500"/>](Analyses/07_simulation_results.html)
 
-This page evaluates how reliable LineageHomology is in estimating import, export and local transmission of genomes in different locations. It uses a down-sampling method to test various scenarios of sampling density. The analysis focuses on four locations: Norway, Victoria, Europe and the USA.
+This page evaluates how reliable LineageHomology is in estimating import, export and local transmission of genomes in the different locations. It tests how the estimates changes in various scenarios of sampling density. The analysis focuses on the four locations: Norway, Victoria, Europe and the USA.
 
