@@ -1,0 +1,1142 @@
+---
+title: "Analysing convergence of estimates using downsampling"
+editor: visual
+knitr:
+  opts_chunk: 
+    comment: "#>" 
+    warning: FALSE
+    message: FALSE
+    collapse: TRUE
+    cache: FALSE
+execute:
+  echo: false
+  message: false
+format: 
+  html:
+    fig-width: 20
+    fig-height: 14
+    page-layout: full
+    toc: true
+    toc-location: left
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning=FALSE, collapse=T, cache=T, 'styler', tidy.opts=list(strict=T))
+
+```
+
+## Outline
+
+In this analysis we evaluate the performance and. stability of the estimates of LineageHomology in various scenarios of sampling density. Our main question is: Do we have enough genomes to reliably estimates the relative values of import, export and local transmission.
+
+To answer this question we perform a down-sampling analysis by removing isolates from the focal location, and isolates from outside of the locations. The results in our main analysis is based on a binary division of the isolates to the focal location: Norway, Victoria, Europe or the USA, and the rest of the rest-of-the-world (ROW). For example, when the focus is shifted from Norway from Victoria, all the genomes from Norway will be placed in the ROW category, and vice versa.
+
+For each focal location we down-sample the focal location and the rest of the world in a step-wise fashion. In the case of the Norwegian analysis, there are $1723$ genomes from Norway. Fom the phylogeny we step-wise remove isolates $0, 100, 200,..., 1690, 1700,1710$ and trim the terminal and possibly internal branches. For each down-sampled dataset we re-estimate the geography by maximum likelihood using ace and rerun LineageHomology to estimate import, export and local transmission. In the Norwegian analysis, there are $8007$ genomes from ROW, and we step-wise remove $0, 1000, 2000, ... , 7700, 7800, 7900, 7950$, and similarly re-estimate.
+
+```{r}
+#Load needed packages
+library(LineageHomology)
+library(BactDating)
+library(phytools)
+library(ape)
+library(geiger)
+library(ggplot2)
+library(stringr)
+library(dplyr)
+library(scales)
+```
+
+```{r Setting up downsampling function, include=F}
+#| label: plot-penguins
+
+
+# Load full result
+load("/Users/magnusnygardosnes/Dropbox/10000_Lovers/01_LineageHomology/11_saved_data/data_for_downsampling.Rdata")
+
+#Set seed
+
+
+# Downsample
+downsample = function(tree, locations, downsample_location = "ROW", remove_tips=1000) {
+  if(remove_tips!=0){
+    indexes = which(locations==downsample_location)
+    ind_select = sample(indexes,remove_tips,replace = F)
+    select_tips = names(locations[ind_select])
+    downsampled_tree = ape::drop.tip(tree,tip =select_tips,trim.internal = T)
+    downsampled_locations = locations[-ind_select]  
+  }
+  else{
+    downsampled_locations = locations
+    downsampled_tree=tree
+  }
+  
+  #Reorder downsampled locations after tips
+  reorder_downsample = match(downsampled_tree$tip.label, names(downsampled_locations))
+  downsampled_locations=downsampled_locations[reorder_downsample]
+  return(list(downsampled_tree = downsampled_tree,
+              downsampled_locations = downsampled_locations))
+}
+
+
+#covariance_matrix = vcvPhylo(tree2)
+
+#NOT CURRENTLY IN USE
+downsample_based_on_ancestral_relationship = function(tree, locations, downsample_location = "ROW", remove_tips=1000) {
+  if(remove_tips!=0){
+    
+    ## NEED TO FILL IN THESE LINES.
+    #indexes = which(locations==downsample_location)
+    #ind_select = sample(indexes,remove_tips,replace = F)
+    
+    select_tips = names(locations[ind_select])
+    downsampled_tree = ape::drop.tip(tree,tip =select_tips,trim.internal = T)
+    downsampled_locations = locations[-ind_select]  
+  }
+  else{
+    downsampled_locations = locations
+    downsampled_tree=tree
+  }
+  
+  #Reorder downsampled locations after tips
+  reorder_downsample = match(downsampled_tree$tip.label, names(downsampled_locations))
+  downsampled_locations=downsampled_locations[reorder_downsample]
+  return(list(downsampled_tree = downsampled_tree,
+              downsampled_locations = downsampled_locations))
+}
+
+#May need to reorder locations after downsampling
+set.seed(1)
+# Test
+#downsampled_1000_NOR = downsample(tree2,locations_NOR,remove_tips=1000,downsample_location = "Norway")
+#ace_downsampled_1000_NOR = ace(x=downsampled_1000_NOR$downsampled_locations, phy= downsampled_1000_NOR$downsampled_tree, type="discrete", mod="ARD")
+
+
+downsample_and_calculate = function(tree, locations, remove_tips=1000, coded_location="Norway",downsample_location="ROW") {
+  #DEBUG
+  #tree=tree2;location=locations_NOR;remove_tips=7000;
+  
+  downsampled = downsample(tree,locations,remove_tips=remove_tips, downsample_location = downsample_location)
+  ace_downsample = ace(x=downsampled$downsampled_locations, phy= downsampled$downsampled_tree, type="discrete", mod="ARD")
+  tips = names(downsampled$downsampled_locations[downsampled$downsampled_locations==coded_location])
+  LH= LineageHomology::LineageHomology_v2(tree=downsampled$downsampled_tree,
+                                 give_tips =tips,
+                                 ace_nodes = ace_downsample$lik.anc,
+                                 ace_tips = to.matrix(downsampled$downsampled_locations,seq=c(coded_location,"ROW")),
+                                 start_time = start_date)
+  
+  return(LH)
+}
+
+# Alternative plotting approaches.
+# An alternative plotting method could be to use the moving averages
+# The downsampling vector could only contain unique values, and so would explore more of the shape of the curve.
+downsample_for_values = function(downsample_vector,reps=3,focal_location="Norway",downsample_row = T) {
+  
+  #Debug 
+  # downsample_vector= c(0, 1000);reps=3;focal_location="Norway";downsample_row = T
+  # downsample_vector = downsample_vector;reps = 1; focal_location = "Norway";downsample_row = F;
+  # downsample_vector = remove_tips_values_AUS;
+  # reps = 1;                      
+  # focal_location = "Victoria";                      
+  # downsample_row = T;
+  
+  result_list = list()
+  
+  if(downsample_row==T) {
+    total_genomes_list = c("Norway"=8007,"Victoria"=7530,"Europe"=5628,"The USA"=7342)
+    downsample_location="ROW"
+    }
+  
+  
+  
+  locations_list  = list("Norway"=locations_NOR,"Victoria"=locations_AUS,"Europe"=locations_EUR,"The USA"=locations_USA)
+  location_coding = c("Norway"="Norway","Victoria"="Australia","Europe"="Europe","The USA"="A_USA")
+  
+  if(downsample_row==F) {
+    total_genomes_list = c("Norway"=1726,"Victoria"=2203,"Europe"=4105,"The USA"=2391)
+    downsample_location = as.character(location_coding[focal_location])
+  }
+  # Obtain correct variables for each downsampling
+  total_genomes = as.numeric(total_genomes_list[focal_location])
+  location = locations_list[focal_location][[1]]
+  coded_location = as.character(location_coding[focal_location])
+  
+  remove_tips_values = downsample_vector
+  remove_tips_values = c(rep(remove_tips_values, each = reps))
+  
+  for (i in 1:length(remove_tips_values)) {
+  cat('\r' ,round(i/length(remove_tips_values)*100,3),  "%")
+  result_list[[paste0(i,"downsampled_", remove_tips_values[i])]] = downsample_and_calculate(tree2, 
+                                                                                                   location = location,
+                                                                                                   remove_tips = remove_tips_values[i],
+                                                                                                   coded_location = coded_location,
+                                                                                            downsample_location=downsample_location)
+  }
+  names(result_list) = paste0("downsampled_", remove_tips_values)
+  
+  # Create a plot of the values with x-labels given by the names
+  import_export_local = lapply(result_list, function(x) x$Import_Export_LocalTransmission)
+  total = unlist(lapply(import_export_local, "[[", 1))+unlist(lapply(import_export_local, "[[", 3))
+  imports = unlist(lapply(import_export_local, "[[", 1))/total
+  exports = unlist(lapply(import_export_local, "[[", 2))/total
+  local_transmission = unlist(lapply(import_export_local, "[[", 3))/total
+  genomes_from_row = total_genomes-remove_tips_values
+  
+  return(list("genomes_from_row"=genomes_from_row,
+              "total_genomes"=total,
+              "imports"=imports,
+              "exports"=exports,
+              "local_transmission"=local_transmission,
+              "focal_location"=focal_location,
+              "downsample_row"=downsample_row))
+}
+
+plot_repeated_downsampling = function(downsampling_result) {
+  
+  downsampling_result$genomes_from_row
+  
+  df <- data.frame(genomes_from_row = downsampling_result$genomes_from_row,
+                 imports = downsampling_result$imports,
+                 exports = downsampling_result$exports,
+                 local_transmission = downsampling_result$local_transmission)
+
+  library(dplyr)
+  median_data = df %>%  group_by(genomes_from_row) %>% summarize(med_imp=median(imports),med_exp =median(exports), med_loc =median(local_transmission))
+  
+  xlab = paste0("Genomes from ", downsampling_result$focal_location)
+  title = paste0("Downsampling ", downsampling_result$focal_location)
+  
+  # Overwrite if it we are downsampling ROW
+  if(downsampling_result$downsample_row) {
+    xlab = paste0("Genomes from ROW")
+    title = paste0("Downsampling ROW keeping ", downsampling_result$focal_location, " constant")
+  }
+  xmax = max(df$genomes_from_row)
+  alpha1 = 0.5
+  g1 = ggplot(df, aes(x = genomes_from_row)) +
+  geom_line(aes(x = genomes_from_row,y = med_imp,color = "Import"), size = 1.5,  data=median_data) +
+  geom_line(aes(x = genomes_from_row,y = med_exp,color = "Export"), size = 1.5,  data=median_data)  +
+  geom_line(aes(x = genomes_from_row,y = med_loc,color = "Local transmission"), size = 1.5,  data=median_data)  +
+  geom_point(aes(y = imports, color  = "Import"), size = 2,alpha=alpha1) +
+  geom_point(aes(y = exports, color = "Export"), size = 2,alpha=alpha1) +
+  geom_point(aes(y = local_transmission, color = "Local transmission"), size = 2,,alpha=alpha1) +
+  scale_y_continuous(limits=c(0,1), oob=rescale_none) +
+    scale_x_continuous(breaks=seq(0,xmax,1000))+
+  labs(title = title,
+       x = xlab,
+       y = "Fraction attributed to transmission mode",
+       color = "Transmission mode") +
+    theme_bw(base_size=20)+
+  theme(legend.position = c(0.5, 0.5),
+        legend.direction = "vertical",
+        panel.border = element_blank(),
+        axis.line = element_line(colour = "black",size = 1, linetype = 1),
+        legend.title.align = 0.5,
+        legend.background = element_blank(),
+        plot.title = element_text(hjust = 0.5))+scale_color_manual(values = c("Import"="steelblue","Export"="firebrick", "Local transmission"="seagreen"))
+    
+  g1
+}
+
+# Number of downsamples
+reps = 5
+save_figures = T
+```
+
+
+
+```{r Downsampling wrt. Norway, include=F}
+set.seed(1)
+
+load(file="/Users/magnusnygardosnes/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/downsampling_analysis.Rdata")
+#Downsampling from Norway
+
+# max=7950
+# downsample_vector = floor(sort(c(seq(0,max,length.out=18),seq((max-100),max,20)[-length(seq((max-100),max,20))])))
+# downsample_NOR_ROW = downsample_for_values(downsample_vector = downsample_vector,
+#                       reps = reps,
+#                       focal_location = "Norway",
+#                       downsample_row = T)
+# Create the plot using ggplot
+ # change this to F if you don't want to save
+if (save_figures) {
+  png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/downsampling_norway.png",units="in", width=10,height = 10,res = 300)  
+}
+
+g1 = plot_repeated_downsampling(downsample_NOR_ROW)
+g1
+if (save_figures) {
+  dev.off()
+}
+
+
+# max=1700
+# downsample_vector = floor(sort(c(seq(0,max,length.out=18),seq((max-100),max,20)[-length(seq((max-100),max,20))])))
+# downsample_NOR = downsample_for_values(downsample_vector = downsample_vector,
+#                       reps = reps,
+#                       focal_location = "Norway",
+#                       downsample_row = F)
+if (save_figures) {
+  png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/downsampling_norway_row.png",units="in", width=10,height = 10,res = 300)
+}
+
+f1 = plot_repeated_downsampling(downsample_NOR)
+f1
+if (save_figures) {
+  dev.off()
+}
+```
+
+```{r Downsampling wrt. Victoria, Australia, include=F}
+#Downsampling Australia
+# max=7500
+# downsample_vector = floor(sort(c(seq(0,max,length.out=18),seq((max-100),max,20)[-length(seq((max-100),max,20))])))
+# downsample_AUS_ROW = downsample_for_values(downsample_vector = downsample_vector,
+#                       reps = reps,
+#                       focal_location = "Victoria",
+#                       downsample_row = T)
+# Create the plot using ggplot
+# 
+if (save_figures) {
+  png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/downsampling_victoria.png",units="in", width=10,height = 10,res = 300)
+}
+
+g2 = plot_repeated_downsampling(downsample_AUS_ROW)
+g2
+if (save_figures) {
+  dev.off()
+}
+
+
+
+# max=2193
+# downsample_vector = floor(sort(c(seq(0,max,length.out=18),seq((max-100),max,20)[-length(seq((max-100),max,20))])))
+# downsample_AUS = downsample_for_values(downsample_vector = downsample_vector,
+#                       reps = reps,
+#                       focal_location = "Victoria",
+#                       downsample_row = F)
+if (save_figures) {
+  png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/downsampling_victoria_row.png",units="in", width=10,height = 10,res = 300)
+}
+
+f2 = plot_repeated_downsampling(downsample_AUS)
+f2
+if (save_figures) {
+  dev.off()
+}
+
+
+```
+
+
+```{r, include=F}
+#Downsampling Europe
+
+# max=5600
+# downsample_vector = floor(sort(c(seq(0,max,length.out=18),seq((max-100),max,20)[-length(seq((max-100),max,20))])))
+# downsample_EUR_ROW = downsample_for_values(downsample_vector = downsample_vector,
+#                       reps = reps,
+#                       focal_location = "Europe",
+#                       downsample_row = T)
+# Create the plot using ggplot
+if (save_figures) {
+  png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/downsampling_europe_row.png",units="in", width=10,height = 10,res = 300)
+}
+
+g3 = plot_repeated_downsampling(downsample_EUR_ROW)
+g3
+if (save_figures) {
+  dev.off()
+}
+
+
+# max=4095
+# downsample_vector = floor(sort(c(seq(0,max,length.out=18),seq((max-100),max,20)[-length(seq((max-100),max,20))])))
+# downsample_EUR = downsample_for_values(downsample_vector = downsample_vector,
+#                       reps = reps,
+#                       focal_location = "Europe",
+#                       downsample_row = F)
+
+if (save_figures) {
+  png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/downsampling_europe.png",units="in", width=10,height = 10,res = 300)
+}
+f3 = plot_repeated_downsampling(downsample_EUR)
+f3
+
+if (save_figures) {
+  dev.off()
+}
+
+
+
+```
+
+```{r Downsampling wrt. USA, include=F}
+#Downsampling the USA
+
+# max=7300
+# downsample_vector = floor(sort(c(seq(0,max,length.out=18),seq((max-100),max,20)[-length(seq((max-100),max,20))])))
+# downsample_USA_ROW = downsample_for_values(downsample_vector = downsample_vector,
+#                       reps = reps,
+#                       focal_location = "The USA",
+#                       downsample_row = T)
+# Create the plot using ggplot
+
+if (save_figures) {
+  png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/downsampling_USA_row.png",units="in", width=10,height = 10,res = 300)
+}
+g4 = plot_repeated_downsampling(downsample_USA_ROW)
+g4
+if (save_figures) {
+  dev.off()
+}
+
+# max=2380
+# downsample_vector = floor(sort(c(seq(0,max,length.out=18),seq((max-100),max,20)[-length(seq((max-100),max,20))])))
+# downsample_USA = downsample_for_values(downsample_vector = downsample_vector,
+#                       reps = reps,
+#                       focal_location = "The USA",
+#                       downsample_row = F)
+if (save_figures) {
+  png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/downsampling_USA.png",units="in", width=10,height = 10,res = 300)
+}
+
+f4 = plot_repeated_downsampling(downsample_USA)
+f4
+if (save_figures) {
+  dev.off()
+}
+
+
+# save(downsample_NOR_ROW,downsample_NOR,downsample_AUS_ROW,downsample_AUS,downsample_EUR_ROW, downsample_EUR,downsample_USA_ROW,downsample_USA,
+#   file="/Users/magnusnygardosnes/Dropbox/10000_Lovers/01_LineageHomology/12_saved_results/downsampling_analysis.Rdata")
+```
+
+```{r plotting section}
+
+# Arrange plots side-by-side
+g1x = g1+scale_x_reverse()
+g2x = g2+scale_x_reverse()
+g3x = g3+scale_x_reverse()
+g4x = g4+scale_x_reverse()
+```
+
+# Downsampling analysis
+::: {.panel-tabset style="width:110%"}
+
+## Norway
+
+```{r}
+library(patchwork)
+(f1 | g1x)
+```
+
+## Victoria, Australia
+
+```{r}
+(f2 | g2x)
+```
+
+## Europe
+
+```{r}
+(f3 | g3x)
+```
+
+## The USA
+
+```{r}
+(f4 | g4x)
+```
+
+:::
+
+```{r Find Asymptotes Import, include=F}
+## Fit exponential curves to determine if they converge, and to what value
+library(lmtest)
+library(nlstools)
+library(minpack.lm)
+library(nnls)
+library(caret)
+#Overwrites dplyr
+library(aomisc)
+
+library(gridExtra)
+
+# Define a function that selects a model, plots it, and returns a list of results
+select_model_plot_and_return = function(downsample_results,internal_downsampling=F) {
+  # Extract relevant variables from the input list
+  result_list = downsample_results
+  genomes = result_list$genomes_from_row
+  loc = result_list$focal_location
+  imports = result_list$imports
+  exports = result_list$exports
+  local_transmission = result_list$local_transmission
+  
+  # Create a data frame for modeling and plotting
+  dat = data.frame(genomes=genomes, imports=imports,exports=exports, local_transmission=local_transmission)
+  
+  if(internal_downsampling) {
+    dat = data.frame(genomes=genomes, imports=1-imports,exports=exports, local_transmission=local_transmission)
+  }
+  # Initialize an empty list to store models
+  models <- list()
+  
+  # Get the names of the mean functions to use for modeling
+  c1 = unlist(getMeanFunctions())
+  function_names = unlist(c1)[seq(1,length(c1),by=2)]
+  
+  # Remove some functions that are not suitable for this data set (BC.4, BC.5, LL.2u, LL.2)
+  function_names = function_names[-c(1,3,12,13)]
+  
+  # Initialize a vector to store root mean square errors (RMSE) for each model
+  rmse_values <- vector()
+  
+  # Loop over the function names and fit each model using drm()
+  for (i in 1:length(function_names)) {
+    # Create a function object from the name using get()
+    fct_obj <- get(function_names[i])()
+    
+    # Fit the model and store it in the list of models
+    model <- drm(imports ~ genomes, fct = fct_obj,data=dat)
+    
+    # Compute RMSE for this model and store it in the vector of RMSE values
+    rmse <- mean(model$predres[,2]^2)
+    rmse_values[i]=rmse
+    
+    models[[i]] <- model
+   }
+   
+   # Find the index of the model with the lowest RMSE value 
+   best = which.min(rmse_values)
+   
+   # Select the best model from the list of models 
+   best_model = models[[best]]
+   
+   # Load ggplot2 package for plotting 
+   library(ggplot2)
+   
+   # Create a plot of imports vs genomes with points and fitted line 
+   prediction = predict(best_model)
+   if(internal_downsampling){
+     prediction= 1-predict(best_model)
+   }
+     datafram = data.frame(genomes, imports)
+   g1 = ggplot(data.frame(genomes, imports), aes(x = genomes, y = imports)) +
+     geom_point()+
+     geom_line(aes(y = prediction), col = "blue", lwd = 2) +
+     ggtitle("Import estimate as we add more genomes")+theme_classic()
+   
+     
+   # Return a list with three elements: best_model, fitted_function name, and plot_fit object 
+   return(list("models" = models,
+               "fitted_function"= function_names[best],
+               "rmse"=rmse_values,
+               "function_names"=function_names,"data" = datafram)
+          )
+}
+
+find_asymptote = function(result, model_index) {
+  model = result$models[[model_index]]
+  coef(model)[which(model$parNames[[2]]=="d")]  
+}
+
+plot_fit = function(result, model_index, internal_downsampling=F) {
+  # Load ggplot2 package for plotting 
+   library(flextable)
+   library(ggpmisc)
+   model = result$models[[model_index]]
+   # Create a plot of imports vs genomes with points and fitted line 
+   prediction = predict(model)
+   asymptote = find_asymptote(result, model_index)
+   ymax=asymptote*1.20
+   if(internal_downsampling){
+     prediction= 1-predict(model)
+     asymptote=1-asymptote
+     ymax=1.05
+   }
+   ymax=1
+   
+   # Create a table with the summary information
+    t1 <- summary(model)
+    # Create a flextable object from the coefficients and varParm
+    
+    # Arrange the table and the plot
+    summary_tab = cbind(rownames(t1$coefficients),t1$coefficients)
+    
+    colnames(summary_tab)[1]="parameter"
+    summary_tab = summary_tab %>% as.data.frame()
+    
+    
+    x_pos_annotations = 1
+    title1="Downsampling rest of the world"
+    dat=result$data
+    if(internal_downsampling) {
+      x_pos_annotations= max(result$data$genomes)*0.97
+      title1="Downsampling focal location"
+    }
+    xmax = max(dat$genomes)
+     g1 = ggplot(result$data, aes(x = genomes, y = imports)) +
+       geom_point()+
+       geom_hline(yintercept = asymptote, size=1.5, color="darkorange", linetype = "dotted")+
+       geom_line(aes(y = prediction), col = "steelblue", lwd = 1,  size = 1.5) +
+       ggtitle(title1)+
+       theme_bw(base_size=20)+
+       ylim(c(0,ymax))+
+       annotate("text", x = x_pos_annotations, y = 0.95, label = t1$text, hjust = 0, vjust = 1, size = 6, fontface = "bold")+
+      annotate(geom = "table", x = x_pos_annotations, y = 0.9, label = list(summary_tab),vjust = 1, hjust = 0,size = 6)+
+     annotate(geom = "text", x = x_pos_annotations, y = 0.65, label = paste0("Residual squared error: ",t1$rseMat[1], " \nDegrees of freedom: ", t1$rseMat[2]),vjust = 1, hjust = 0, size = 6)+
+       annotate(geom = "text", x = x_pos_annotations, y = 0.55, label = paste0("Asymptote: ",asymptote),vjust = 1, hjust = 0, size = 6)+
+       xlab("Genomes")+
+       ylab("Imports per local case")+scale_x_continuous(breaks=seq(0,xmax,1000))
+     
+       #scale_y_continuous(breaks = seq(0, ymax, 0.05))
+     g1
+    # Create an empty ggplot object with the same dimensions as g1
+
+
+}
+
+result_NOR = select_model_plot_and_return(downsample_results = downsample_NOR_ROW); #summary(result_NOR$model)
+result_AUS = select_model_plot_and_return(downsample_results = downsample_AUS_ROW); #summary(result_AUS$model)
+result_EUR = select_model_plot_and_return(downsample_results = downsample_EUR_ROW); #summary(result_EUR$model)
+result_USA = select_model_plot_and_return(downsample_results = downsample_USA_ROW); #summary(result_USA$model)
+
+# Select overall best model:
+rmse_all = result_NOR$rmse + result_AUS$rmse + result_EUR$rmse + result_USA$rmse
+best_model_index = which.min(rmse_all)
+#result_NOR$function_names[best_model_index]
+
+e1 = plot_fit(result_NOR, model_index=best_model_index)
+e2 =  plot_fit(result_AUS, model_index=best_model_index)
+e3 = plot_fit(result_EUR, model_index=best_model_index)
+e4 = plot_fit(result_USA, model_index=best_model_index)
+
+
+# find_asymptote(result_NOR, best_model_index); find_asymptote(result_AUS, best_model_index)
+# find_asymptote(result_EUR, best_model_index); find_asymptote(result_USA, best_model_index)
+
+result_NOR_internal = select_model_plot_and_return(downsample_results = downsample_NOR,internal_downsampling = T)
+result_AUS_internal = select_model_plot_and_return(downsample_results = downsample_AUS,internal_downsampling = T)
+result_EUR_internal = select_model_plot_and_return(downsample_results = downsample_EUR,internal_downsampling = T)
+result_USA_internal = select_model_plot_and_return(downsample_results = downsample_USA,internal_downsampling = T)
+
+rmse_all_internal = result_NOR_internal$rmse + result_AUS_internal$rmse + result_EUR_internal$rmse + result_USA_internal$rmse
+best_model_index_internal = which.min(rmse_all_internal)
+
+d1 = plot_fit(result_NOR_internal, model_index=best_model_index_internal, internal_downsampling=T)
+d2 = plot_fit(result_AUS_internal, model_index=best_model_index_internal, internal_downsampling=T)
+d3 = plot_fit(result_EUR_internal, model_index=best_model_index_internal, internal_downsampling=T)
+d4 = plot_fit(result_USA_internal, model_index=best_model_index_internal, internal_downsampling=T)
+d1x = d1+scale_x_reverse()
+d2x = d2+scale_x_reverse()
+d3x = d3+scale_x_reverse()
+d4x = d4+scale_x_reverse()
+
+```
+
+
+## Asymptote of Import in downsamples
+
+::: {.panel-tabset style="width:110%"}
+
+## Norway
+
+```{r  , include=T}
+(e1 | d1x)
+```
+
+## Victoria
+
+```{r  , include=T}
+(e2 | d2x)
+```
+
+## Europe
+```{r  , include=T}
+(e3 | d3x)
+```
+
+## The USA
+```{r  , include=T}
+(e4 | d4x)
+```
+
+:::
+
+
+```{r Find Asymptotes Export, include=F}
+## Fit exponential curves to determine if they converge, and to what value
+library(lmtest)
+library(nlstools)
+library(minpack.lm)
+library(nnls)
+library(caret)
+#Overwrites dplyr
+library(aomisc)
+
+library(gridExtra)
+
+# Define a function that selects a model, plots it, and returns a list of results
+select_model_plot_and_return = function(downsample_results,internal_downsampling=F) {
+  # Extract relevant variables from the input list
+  result_list = downsample_results
+  genomes = result_list$genomes_from_row
+  loc = result_list$focal_location
+  imports = result_list$imports
+  exports = result_list$exports
+  local_transmission = result_list$local_transmission
+  
+  # Create a data frame for modeling and plotting
+  dat = data.frame(genomes=genomes, imports=imports,exports=exports, local_transmission=local_transmission)
+  dat = dat[-c((nrow(dat)-20):nrow(dat)),]
+  if(internal_downsampling) {
+    dat = data.frame(genomes=genomes, imports=1-imports,exports=1-exports, local_transmission=local_transmission)
+    dat = dat[-c((nrow(dat)-20):nrow(dat)),]
+    #For export function estimation we ignore the start by removing the tail datapoints.
+    
+  }
+  # Initialize an empty list to store models
+  models <- list()
+  
+  # Get the names of the mean functions to use for modeling
+  c1 = unlist(getMeanFunctions())
+  function_names = unlist(c1)[seq(1,length(c1),by=2)]
+  which(function_names=="LL.4")
+  # Remove some functions that are not suitable for this data set (BC.4, BC.5, LL.2u, LL.2)
+  function_names = function_names[-c(1,3, 6,12,13,18,22)]
+  
+  # Initialize a vector to store root mean square errors (RMSE) for each model
+  rmse_values <- vector()
+  
+  # Loop over the function names and fit each model using drm()
+  for (i in 1:length(function_names)) {
+    # Create a function object from the name using get()
+    fct_obj <- get(function_names[i])()
+    
+    # Fit the model and store it in the list of models
+    model <- drm(exports ~ genomes, fct = fct_obj,data=dat)
+    
+    # Compute RMSE for this model and store it in the vector of RMSE values
+    rmse <- mean(model$predres[,2]^2)
+    rmse_values[i]=rmse
+    
+    models[[i]] <- model
+   }
+   
+   # Find the index of the model with the lowest RMSE value 
+   best = which.min(rmse_values)
+   
+   # Select the best model from the list of models 
+   best_model = models[[best]]
+   
+   # Load ggplot2 package for plotting 
+   library(ggplot2)
+   
+   # Create a plot of imports vs genomes with points and fitted line 
+   prediction = predict(best_model)
+   if(internal_downsampling){
+     prediction= 1-predict(best_model)
+   }
+   datafram = dat
+   g1 = ggplot(datafram, aes(x = genomes, y = exports)) +
+     geom_point()+
+     geom_line(aes(y = prediction), col = "blue", lwd = 2) +
+     ggtitle("Export estimate as we add more genomes")+theme_classic()
+   
+     
+   # Return a list with three elements: best_model, fitted_function name, and plot_fit object 
+   return(list("models" = models,
+               "fitted_function"= function_names[best],
+               "rmse"=rmse_values,
+               "function_names"=function_names,"data" = datafram)
+          )
+}
+
+find_asymptote = function(result, model_index) {
+  model = result$models[[model_index]]
+  coef(model)[which(model$parNames[[2]]=="d")]  
+}
+
+plot_fit = function(result, model_index, internal_downsampling=F) {
+  # Debug
+  result=result_NOR; model_index=best_model_index; internal_downsampling=F
+  
+  
+  # Load ggplot2 package for plotting 
+   library(flextable)
+   library(ggpmisc)
+   model = result$models[[model_index]]
+   # Create a plot of imports vs genomes with points and fitted line 
+   prediction = predict(model)
+   asymptote = find_asymptote(result, model_index)
+   ymax=asymptote*1.20
+   if(internal_downsampling){
+     prediction= 1-predict(model)
+     asymptote=1-asymptote
+     ymax=1.05
+   }
+   ymax=1
+   
+   # Create a table with the summary information
+    t1 <- summary(model)
+    # Create a flextable object from the coefficients and varParm
+    
+    # Arrange the table and the plot
+    summary_tab = cbind(rownames(t1$coefficients),t1$coefficients)
+    
+    colnames(summary_tab)[1]="parameter"
+    summary_tab = summary_tab %>% as.data.frame()
+    
+    
+    x_pos_annotations = 1
+    title1="Downsampling rest of the world"
+    if(internal_downsampling) {
+      x_pos_annotations= max(result$data$genomes)*0.97
+      title1="Downsampling focal location"
+    }
+    dat=result$data
+    if(internal_downsampling){
+      dat$exports= 1-dat$exports
+    }
+    xmax = max(dat$genomes)
+     g1 = ggplot(dat, aes(x = dat$genomes, y = dat$exports)) +
+       geom_point()+
+       geom_hline(yintercept = asymptote, size=1.5, color="darkorange", linetype = "dotted",  size = 1.5)+
+       geom_line(aes(y = prediction), col = "firebrick", lwd = 1) +
+       ggtitle(title1)+
+       theme_bw(base_size=20)+
+       ylim(c(0,ymax))+
+       annotate("text", x = x_pos_annotations, y = 0.95, label = t1$text, hjust = 0, vjust = 1, size = 6, fontface = "bold")+
+      annotate(geom = "table", x = x_pos_annotations, y = 0.9, label = list(summary_tab),vjust = 1, hjust = 0,size = 6)+
+     annotate(geom = "text", x = x_pos_annotations, y = 0.65, label = paste0("Residual squared error: ",t1$rseMat[1], " \nDegrees of freedom: ", t1$rseMat[2]),vjust = 1, hjust = 0, size = 6)+
+       annotate(geom = "text", x = x_pos_annotations, y = 0.55, label = paste0("Asymptote: ",asymptote),vjust = 1, hjust = 0, size = 6)+
+       xlab("Genomes")+
+       ylab("Exports per local case")+
+       scale_x_continuous(breaks=seq(0,xmax,1000))
+     
+       #scale_y_continuous(breaks = seq(0, ymax, 0.05))
+     g1
+    # Create an empty ggplot object with the same dimensions as g1
+
+
+}
+
+result_NOR = select_model_plot_and_return(downsample_results = downsample_NOR_ROW); #summary(result_NOR$model)
+result_AUS = select_model_plot_and_return(downsample_results = downsample_AUS_ROW); #summary(result_AUS$model)
+result_EUR = select_model_plot_and_return(downsample_results = downsample_EUR_ROW); #summary(result_EUR$model)
+result_USA = select_model_plot_and_return(downsample_results = downsample_USA_ROW); #summary(result_USA$model)
+
+# Select overall best model:
+rmse_all = result_NOR$rmse + result_AUS$rmse + result_EUR$rmse + result_USA$rmse
+best_model_index = which.min(rmse_all)
+#result_NOR$function_names[best_model_index]
+
+f1 = plot_fit(result_NOR, model_index=best_model_index)
+f2 =  plot_fit(result_AUS, model_index=best_model_index)
+f3 = plot_fit(result_EUR, model_index=best_model_index)
+f4 = plot_fit(result_USA, model_index=best_model_index)
+
+
+# find_asymptote(result_NOR, best_model_index); find_asymptote(result_AUS, best_model_index)
+# find_asymptote(result_EUR, best_model_index); find_asymptote(result_USA, best_model_index)
+
+result_NOR_internal = select_model_plot_and_return(downsample_results = downsample_NOR,internal_downsampling = T)
+result_AUS_internal = select_model_plot_and_return(downsample_results = downsample_AUS,internal_downsampling = T)
+result_EUR_internal = select_model_plot_and_return(downsample_results = downsample_EUR,internal_downsampling = T)
+result_USA_internal = select_model_plot_and_return(downsample_results = downsample_USA,internal_downsampling = T)
+
+rmse_all_internal = result_NOR_internal$rmse + result_AUS_internal$rmse + result_EUR_internal$rmse + result_USA_internal$rmse
+best_model_index_internal = which.min(rmse_all_internal)
+
+g1 = plot_fit(result_NOR_internal, model_index=best_model_index_internal, internal_downsampling=T)
+g2 = plot_fit(result_AUS_internal, model_index=best_model_index_internal, internal_downsampling=T)
+g3 = plot_fit(result_EUR_internal, model_index=best_model_index_internal, internal_downsampling=T)
+g4 = plot_fit(result_USA_internal, model_index=best_model_index_internal, internal_downsampling=T)
+g1x = g1+scale_x_reverse()
+g2x = g2+scale_x_reverse()
+g3x = g3+scale_x_reverse()
+g4x = g4+scale_x_reverse()
+
+```
+
+
+## Asymptote of Export in downsamples
+
+::: {.panel-tabset style="width:110%"}
+
+## Norway
+
+```{r , include=T}
+(f1 | g1x)
+```
+
+## Victoria
+
+```{r , include=T}
+(f2 | g2x)
+```
+
+## Europe
+
+```{r, include=T}
+(f3 | g3x)
+```
+
+## The USA
+
+```{r, include=T}
+(f4 | g4x)
+```
+
+:::
+
+
+```{r SAVNG FIGURES, include=F}
+# Saving figures for paper
+
+png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/import_asymptote_norway.png",units="in", width=10,height = 10,res = 300)
+e1
+dev.off()
+
+png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/import_asymptote_victoria.png",units="in", width=10,height = 10,res = 300)
+e2
+dev.off()
+
+png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/import_asymptote_Europe.png",units="in", width=10,height = 10,res = 300)
+e3
+dev.off()
+
+png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/import_asymptote_USA.png",units="in", width=10,height = 10,res = 300)
+e4
+dev.off()
+
+
+png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/export_asymptote_Norway.png",units="in", width=10,height = 10,res = 300)
+f1
+dev.off()
+
+png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/export_asymptote_victoria.png",units="in", width=10,height = 10,res = 300)
+f2
+dev.off()
+
+png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/export_asymptote_Europe.png",units="in", width=10,height = 10,res = 300)
+f3
+dev.off()
+
+png(filename="~/Dropbox/10000_Lovers/99_Figures_for_paper/Supplementary/export_asymptote_USA.png",units="in", width=10,height = 10,res = 300)
+f4
+dev.off()
+
+
+```
+
+
+```{r , include=T}
+# Simple asymptotic model
+# start_grid <- expand.grid(a = seq(-5, 5, by = 0.1), b = seq(-3, 3, by = 0.5))
+# asymp_model <- nls2(imports ~ exp(a) + b*log(genomes), start =start_grid)
+
+# More complex asymptotic model
+# start_grid <- expand.grid(a = seq(-1, 1, by = 0.5), b = seq(-3, 3, by = 0.5), c=seq(-3, 3, by = 0.5), d=seq(-3, 3, by = 0.5))
+# asymp_model_1 = nls2(imports~ exp(a) + (b*(genomes^d))/(c+genomes^d), start= start_grid, data=dat)
+```
+
+````{=html}
+<!-- ## Simulate phylogeny
+
+
+
+
+
+# Discarded sections
+select_model_plot_and_return =function(downsample_results) {
+  result_list = downsample_results
+  genomes = result_list$genomes_from_row
+  loc = result_list$focal_location
+  imports = result_list$imports
+  exports = result_list$exports
+  local_transmission = result_list$local_transmission
+  dat = data.frame(genomes=genomes, imports=imports,exports=exports, local_transmission=local_transmission)
+
+  models <- list()
+  # Loop over the function names
+  c1 = unlist(getMeanFunctions())
+  function_names = unlist(c1)[seq(1,length(c1),by=2)]
+  # Remove  BC.4 and BC.5 LL.2u, LL.2
+  function_names = function_names[-c(1,3,12,13)]
+  rmse_values <- vector()
+
+for (i in 1:length(function_names)) {
+  # Create a function object from the name
+  fct_obj <- get(function_names[i])()
+  # Fit the model and store it in the list
+  model <- drm(imports ~ genomes, fct = fct_obj)
+  rmse <- mean(model$predres[,2]^2)
+  rmse_values[i]=rmse
+  models[[i]] <- model
+}
+best = which.min(rmse_values)
+best_model = models[[best]]
+# Load the caret package
+#summary(best_model)
+#plot(best_model)
+
+g1 = ggplot(data.frame(genomes, imports), aes(x = genomes, y = imports)) +
+  geom_point()+
+  geom_line(aes(y = predict(best_model)), col = "blue", lwd = 2) +
+  ggtitle("Import estimate as we add more and more genomes")+theme_classic()
+  
+return(list("model" = best_model, "fitted_function"= function_names[best], "Plot_fit"=g1))
+}
+
+generate_x_y = function(result_list, row_or_focal="row"){
+
+  genomes_from_focal = c("Victoria"=7530,"A_USA"=7342,"Norway"=8007, "Europe"=5628)
+  if(row_or_focal != "row") {
+    genomes_from_focal = c("Victoria"=2203,"A_USA"=2391,"Norway"=1726, "Europe"=4105)
+  }
+  
+  
+  genomes = result_list$genomes_from_row
+  loc = result_list$focal_location
+  imports = result_list$imports
+  exports = result_list$exports
+  local_transmission = result_list$local_transmission
+  
+
+  dat = data.frame(genomes=genomes, imports=imports,exports=exports, local_transmission=local_transmission)
+  head(dat)
+  
+  
+  
+  model_import <- nls(imports ~ a + b * exp(r * genomes),
+                      data = dat,
+                      start = list(a =0.25, b=-0.25, r = -1e-4))
+  
+  # fit an asymptotic function
+  asymp_model <- nls(imports ~ a + b*genomes^c, start = list(a = 1, b = 1,c=0.01))
+  summary(asymp_model)
+  
+  # fit an asymptotic exponential function
+  exp_model <- nls(imports ~ a * (1 - exp(-alpha * genomes)), start = list(a = 1, alpha = 0.01), data = dat)
+  
+  
+  start_grid <- expand.grid(a = seq(-1, 0, by = 0.1), b = seq(-3, 0, by = 0.5))
+  
+  
+  start_grid <- expand.grid(a = seq(-3, 3, by = 0.5), b = seq(-3, 3, by = 0.5), c=seq(-3, 3, by = 0.5), d=seq(-3, 3, by = 0.5))
+  
+  
+  asymptotic_model = nls2(imports~ a + b*genomes^d/(c+genomes^d), start= start_grid, data=dat)
+  decay_model <- nls2(imports ~ ((a / (b+1))*genomes^(b+1))+1-(a/(b+1)), start = list(a = -3/4, b = -2), data = dat)
+  
+  decay_model <- nls2(imports ~ ((a / (b+1))*genomes^(b+1))+1-(a/(b+1)), start = start_grid, data = dat)
+  
+  
+  summary(exp_model)
+  lrtest(model_import, asymp_model, exp_model)
+  lrtest(asymp_model, exp_model)
+  ?lrtest
+  # plot the data
+  plot(genomes, imports, main = "Import estimate as we add more and more genomes")
+  lines(genomes, predict(model_import), col = "red", lwd = 2)
+  lines(genomes, predict(asymp_model), col = "blue", lwd = 2)
+  lines(genomes, predict(exp_model), col = "green", lwd = 2)
+  lines(genomes, predict(asymptotic_model), col = "purple", lwd = 2)
+
+  
+  plot(dat$genomes, dat$imports, col = "red")
+  lines(dat$genomes, pred, col = "blue") # model predictions
+  lines(dat$genomes, pred[, "fit"], col = "blue") # model predictions
+  lines(dat$genomes, pred[, "lwr"], col = rgb(0, 0, 1, alpha = 0.5)) # lower bound of confidence interval
+  lines(dat$genomes, pred[, "upr"], col = rgb(0, 0, 1, alpha = 0.5)) # upper bound of confidence interval
+  #Access the best fit parameters
+  a <- coef(model_import)[1]
+  b <- coef(model_import)[2]
+  r <- coef(model_import)[3]
+  #Calculate the limit as x approaches infinity
+  limit <- a + b * exp(r * 20000)
+}
+
+
+
+```{r}
+#1. Simulate phylogeny
+set.seed(2)
+dated_tree = BactDating::simdatedtree(nsam = 200,dateroot = 2000)
+plot(ladderize(dated_tree))
+axisPhylo(side=1, backward = F, root.time=2000)
+```
+
+## Simulate geography
+
+We set up a transition rate matrix where the instaneous rate of moving to an different location is 1/10
+
+|                          | **Transition Rate Matrix** |       |
+|--------------------------|----------------------------|-------|
+|                          | Location of interest       | Other |
+| **Location of interest** | 0.9                        | 0.1   |
+| **Other**                | 0.1                        | 0.9   |
+
+This means that we expect the amount of local transmission to be 90% and 10% to be importation.
+
+```{r}
+#2. Simulate geography
+# Define the transition matrix
+transition_matrix <- matrix(c(0.9, 0.1, 0.1, 0.9), nrow = 2)
+
+# Define the states (locations)
+# TBD: Instead of sampling we can probably place the tips based on the covariance of the samples. 
+location2 = c(rep("RoW",40), rep("Norway",160))
+
+covariance_matrix = vcvPhylo(dated_tree)
+
+location2 = sample(location2)
+names(location2)=dated_tree$tip.label
+
+# Compute the state probabilities using the ace function from the ape package
+sim = make.simmap(tree=dated_tree, x=location2, mod="ER")
+c1 = summary(sim)
+node_states = to.matrix(c1$states,seq= c("RoW","Norway"))
+tip_states = to.matrix(location2,seq= c("RoW","Norway"))
+
+
+#plot the simulated history and probabilities
+plotSimmap(sim, fsize = 0.5, mar=c(0.2,0.2,0.2,0.2))
+plot.phylo(dated_tree,edge.width = 3,label.offset = 0.15, mar=c(0.2,0.2,0.2,0.2))
+nodelabels(pie=node_states,cex=0.3,piecol=c("red","black"))
+tiplabels(pie=tip_states, cex=0.3,piecol=c("red","black"))
+
+```
+
+## Calculate the true number of transmission lineages, imports, exports and local transmission
+
+```{r}
+result = LineageHomology(tree = dated_tree, ace_nodes = node_states,tip_states, start_time = 2000)
+
+```
+
+## Downsample the tree
+
+```{r}
+#1. Downsample
+
+```
+
+## Ideas
+
+-   High sampling density means high probability of capturing closely related lineages. Should sample from the covariance matrix.
+-   Downsampling the true phylogeny
+
+## GPTprompts
+
+I have a time dated phylogeny.\
+I need to simulate locations on the phylogeny in R.\
+I want the rate of staying in the same location to be 90% and the rate of moving to a different location to be 10%.\
+Can you help me with the R code to do this?
+
+...
+
+I need the format to match the output from ace, so that I have the probabilitiy of each state on each node. Can you process the result to achieve that? -->
+````

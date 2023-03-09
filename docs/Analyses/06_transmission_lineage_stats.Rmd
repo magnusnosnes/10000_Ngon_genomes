@@ -74,17 +74,12 @@ summarize_lineages = function(Result) {
 ```
 
 ## Overview
-Here we provide an summary of some of the important statistics for the transmission lineages. 
-From the [transmission lineage explorer](https://magnunos.shinyapps.io/LineageHomology_Explorer/) it is evident that in all locations: Europe, the USA, Norway and Australia, some transmission lineages account for a disproportionate amount of the sequences observed in the locations. Yet in all locations most transmission lineages are small. Here we compare the different locations in terms of transmission lineage size distributions. 
+In this summary, we provide an overview of some of the important statistics for the transmission lineages in different locations. It is evident from the [transmission lineage explorer](https://magnunos.shinyapps.io/LineageHomology_Explorer/) that some transmission lineages account for a disproportionate amount of the sequences observed in Europe, the USA, Norway, and Australia. However, most transmission lineages in all locations are small. We compare the different locations in terms of transmission lineage size distributions and consider the following research questions (RQs):
 
-> It should kept in mind that the size of transmission lineages can be similar, even though they grown in very different ways. For example:  a very old, slow spreading, transmission lineage may have a similar size to a  a young fast spreading
+1. What percentage of local cases are explained by the 10 largest lineages, and what percentage are explained by singletons?
+2. How are the lineage sizes distributed? Do they follow a power law?
 
-We consider the research questions (RQs):
-
-1. How many % of local cases does the 10 largest lineages explain, and how many are explained by singletons?
-2. How is the lineage sizes distributed? Power law distributions?
- <!-- 3. Can we summarize other interesting stuff about the lineages? --> 
-
+> It should be kept in mind that transmission lineages with similar sizes may have grown in different ways. For example, a slow-spreading, old lineage may have a similar size to a fast-spreading, young lineage.
 
 ## RQ 1: How many % of local cases does the 10 largest lineages explain, and how many are explained by singletons?
 
@@ -141,7 +136,7 @@ plotit(USA)
 
 ```
  
-Next we fit a powerlaw distribution using the fit_power_law function from the igraph R-package. We use the Kolmogorov-Smirnov included in the package test calculate the p-value indicating if the data if significantly different what we expect under a power law distribution with the estimated coefficient.
+ To fit a power law distribution, we use the fit_power_law function from the `igraph` `R-package`. We then use the Kolmogorov-Smirnov test included in the package to calculate the p-value, which indicates whether the data is significantly different from what we expect under a power law distribution with the estimated coefficient.
  
 ```{r, fig.height=3,fig.width=8, include=T, echo=T}
 powerNOR = fit_power_law(x = Result_NOR$Lineage_sizes, xmin=1)
@@ -222,6 +217,18 @@ plotit(USA)
 
 ```
 
+```{r remedy001}
+# Code sequences to extract some info for the paper - can be deleted.
+# inds = unlist(lapply(eur_tips, FUN = function(x) which(x==name_date$name)))
+# 
+# nor_tips %in% eur_tips
+# remove_norwegian = unlist(lapply(nor_tips, FUN = function(x) which(x==eur_tips)))
+# eur_without_nor = eur_tips[-remove_norwegian]
+# 
+# inds = unlist(lapply(eur_without_nor, FUN = function(x) which(x==name_date$name)))
+# length(name_date$dates[inds][name_date$dates[inds] >= 2013 & name_date$dates[inds] <= 2018])
+
+```
 
 
  <!-- ## RQ 3: Can we summarize other interesting stuff about the lineages? --> 

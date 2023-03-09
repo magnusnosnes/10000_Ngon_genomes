@@ -356,6 +356,7 @@ skyhighMic_nonMosaic = skygrowth.map(penA_highMic_nonMosaic)
 #save(skyhighMic_nonMosaic,file = paste0(path_data, "skyhighMic_nonMosaic.Rdata"))
 #load(file=paste0(path_data, "skyhighMic_nonMosaic.Rdata"))
 skyFullTree = skygrowth.map(tree)
+#skyFullTree = skygrowth.map(tree, res=100)
 #save(skyFullTree, file = paste0(path_data, "skyFullTree.Rdata"))
 #load(file = paste0(path_data, "skyFullTree.Rdata"))
 ```

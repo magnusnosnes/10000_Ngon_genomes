@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.269">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Analysing convergence of estimates using downsampling</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="07_simulation_results_files/libs/clipboard/clipboard.min.js"></script>
+<script src="07_simulation_results_files/libs/quarto-html/quarto.js"></script>
+<script src="07_simulation_results_files/libs/quarto-html/popper.min.js"></script>
+<script src="07_simulation_results_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="07_simulation_results_files/libs/quarto-html/anchor.min.js"></script>
+<link href="07_simulation_results_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="07_simulation_results_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="07_simulation_results_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="07_simulation_results_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="07_simulation_results_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-full toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#outline" id="toc-outline" class="nav-link active" data-scroll-target="#outline">Outline</a></li>
+  <li><a href="#downsampling-analysis" id="toc-downsampling-analysis" class="nav-link" data-scroll-target="#downsampling-analysis">Downsampling analysis</a>
+  <ul class="collapse">
+  <li><a href="#asymptote-of-import-in-downsamples" id="toc-asymptote-of-import-in-downsamples" class="nav-link" data-scroll-target="#asymptote-of-import-in-downsamples">Asymptote of Import in downsamples</a></li>
+  <li><a href="#asymptote-of-export-in-downsamples" id="toc-asymptote-of-export-in-downsamples" class="nav-link" data-scroll-target="#asymptote-of-export-in-downsamples">Asymptote of Export in downsamples</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content column-page-right" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Analysing convergence of estimates using downsampling</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="outline" class="level2">
+<h2 class="anchored" data-anchor-id="outline">Outline</h2>
+<p>In this analysis we evaluate the performance and. stability of the estimates of LineageHomology in various scenarios of sampling density. Our main question is: Do we have enough genomes to reliably estimates the relative values of import, export and local transmission.</p>
+<p>To answer this question we perform a down-sampling analysis by removing isolates from the focal location, and isolates from outside of the locations. The results in our main analysis is based on a binary division of the isolates to the focal location: Norway, Victoria, Europe or the USA, and the rest of the rest-of-the-world (ROW). For example, when the focus is shifted from Norway from Victoria, all the genomes from Norway will be placed in the ROW category, and vice versa.</p>
+<p>For each focal location we down-sample the focal location and the rest of the world in a step-wise fashion. In the case of the Norwegian analysis, there are <span class="math inline">\(1723\)</span> genomes from Norway. Fom the phylogeny we step-wise remove isolates <span class="math inline">\(0, 100, 200,..., 1690, 1700,1710\)</span> and trim the terminal and possibly internal branches. For each down-sampled dataset we re-estimate the geography by maximum likelihood using ace and rerun LineageHomology to estimate import, export and local transmission. In the Norwegian analysis, there are <span class="math inline">\(8007\)</span> genomes from ROW, and we step-wise remove <span class="math inline">\(0, 1000, 2000, ... , 7700, 7800, 7900, 7950\)</span>, and similarly re-estimate.</p>
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-1_36b75361492f08ea4874c8f273bbb2c3">
+
+</div>
+<div class="cell" data-hash="07_simulation_results_cache/html/plotting section_610888afb18243adc29d1edd81c54dd3">
+
+</div>
+</section>
+<section id="downsampling-analysis" class="level1">
+<h1>Downsampling analysis</h1>
+<div class="panel-tabset" style="width:110%">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">Norway</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">Victoria, Australia</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false" href="">Europe</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false" href="">The USA</a></li></ul>
+<div class="tab-content" style="width:110%">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-3_a389724d400dda70f7429f3d1210d40e">
+<div class="cell-output-display">
+<p><img src="07_simulation_results_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="1920"></p>
+</div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-4_ddc698e25e7a442e553fe44b5b6dadf9">
+<div class="cell-output-display">
+<p><img src="07_simulation_results_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="1920"></p>
+</div>
+</div>
+</div>
+<div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-5_42c718c1cbf883179d81f6d70b0b7b77">
+<div class="cell-output-display">
+<p><img src="07_simulation_results_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="1920"></p>
+</div>
+</div>
+</div>
+<div id="tabset-1-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-4-tab">
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-6_262a24cac77855577ecf0ed40ef1ea47">
+<div class="cell-output-display">
+<p><img src="07_simulation_results_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="1920"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<section id="asymptote-of-import-in-downsamples" class="level2">
+<h2 class="anchored" data-anchor-id="asymptote-of-import-in-downsamples">Asymptote of Import in downsamples</h2>
+<div class="panel-tabset" style="width:110%">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true" href="">Norway</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false" href="">Victoria</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false" href="">Europe</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-4" role="tab" aria-controls="tabset-2-4" aria-selected="false" href="">The USA</a></li></ul>
+<div class="tab-content" style="width:110%">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-7_880f4f6a8f541cf2fe78c40066964e64">
+<div class="cell-output-display">
+<p><img src="07_simulation_results_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="1920"></p>
+</div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-8_7d7afab3fdbbd24e70d3b61bb08ea2d0">
+<div class="cell-output-display">
+<p><img src="07_simulation_results_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="1920"></p>
+</div>
+</div>
+</div>
+<div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-9_d3f9db176618fa4af17b2de82c7aaa75">
+<div class="cell-output-display">
+<p><img src="07_simulation_results_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="1920"></p>
+</div>
+</div>
+</div>
+<div id="tabset-2-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-4-tab">
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-10_a65261f148877cf46ff0718cf435f380">
+<div class="cell-output-display">
+<p><img src="07_simulation_results_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="1920"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="asymptote-of-export-in-downsamples" class="level2">
+<h2 class="anchored" data-anchor-id="asymptote-of-export-in-downsamples">Asymptote of Export in downsamples</h2>
+<div class="panel-tabset" style="width:110%">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true" href="">Norway</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false" href="">Victoria</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-3" role="tab" aria-controls="tabset-3-3" aria-selected="false" href="">Europe</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-4" role="tab" aria-controls="tabset-3-4" aria-selected="false" href="">The USA</a></li></ul>
+<div class="tab-content" style="width:110%">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-11_9660373a4133f6c2cd167172b345e610">
+<div class="cell-output-display">
+<p><img src="07_simulation_results_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="1920"></p>
+</div>
+</div>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-12_975a3f63117237e22805d659fd703353">
+<div class="cell-output-display">
+<p><img src="07_simulation_results_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="1920"></p>
+</div>
+</div>
+</div>
+<div id="tabset-3-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-3-tab">
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-13_ba4b3ca3d432e45aed73de892fe2674e">
+<div class="cell-output-display">
+<p><img src="07_simulation_results_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="1920"></p>
+</div>
+</div>
+</div>
+<div id="tabset-3-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-4-tab">
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-14_b43a74838c1ead84974124e3f858c282">
+<div class="cell-output-display">
+<p><img src="07_simulation_results_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="1920"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell" data-hash="07_simulation_results_cache/html/unnamed-chunk-15_ba9133845d49122bba6d222317d7c7f4">
+
+</div>
+<!-- ## Simulate phylogeny
+
+
+
+
+
+# Discarded sections
+select_model_plot_and_return =function(downsample_results) {
+  result_list = downsample_results
+  genomes = result_list$genomes_from_row
+  loc = result_list$focal_location
+  imports = result_list$imports
+  exports = result_list$exports
+  local_transmission = result_list$local_transmission
+  dat = data.frame(genomes=genomes, imports=imports,exports=exports, local_transmission=local_transmission)
+
+  models <- list()
+  # Loop over the function names
+  c1 = unlist(getMeanFunctions())
+  function_names = unlist(c1)[seq(1,length(c1),by=2)]
+  # Remove  BC.4 and BC.5 LL.2u, LL.2
+  function_names = function_names[-c(1,3,12,13)]
+  rmse_values <- vector()
+
+for (i in 1:length(function_names)) {
+  # Create a function object from the name
+  fct_obj <- get(function_names[i])()
+  # Fit the model and store it in the list
+  model <- drm(imports ~ genomes, fct = fct_obj)
+  rmse <- mean(model$predres[,2]^2)
+  rmse_values[i]=rmse
+  models[[i]] <- model
+}
+best = which.min(rmse_values)
+best_model = models[[best]]
+# Load the caret package
+#summary(best_model)
+#plot(best_model)
+
+g1 = ggplot(data.frame(genomes, imports), aes(x = genomes, y = imports)) +
+  geom_point()+
+  geom_line(aes(y = predict(best_model)), col = "blue", lwd = 2) +
+  ggtitle("Import estimate as we add more and more genomes")+theme_classic()
+  
+return(list("model" = best_model, "fitted_function"= function_names[best], "Plot_fit"=g1))
+}
+
+generate_x_y = function(result_list, row_or_focal="row"){
+
+  genomes_from_focal = c("Victoria"=7530,"A_USA"=7342,"Norway"=8007, "Europe"=5628)
+  if(row_or_focal != "row") {
+    genomes_from_focal = c("Victoria"=2203,"A_USA"=2391,"Norway"=1726, "Europe"=4105)
+  }
+  
+  
+  genomes = result_list$genomes_from_row
+  loc = result_list$focal_location
+  imports = result_list$imports
+  exports = result_list$exports
+  local_transmission = result_list$local_transmission
+  
+
+  dat = data.frame(genomes=genomes, imports=imports,exports=exports, local_transmission=local_transmission)
+  head(dat)
+  
+  
+  
+  model_import <- nls(imports ~ a + b * exp(r * genomes),
+                      data = dat,
+                      start = list(a =0.25, b=-0.25, r = -1e-4))
+  
+  # fit an asymptotic function
+  asymp_model <- nls(imports ~ a + b*genomes^c, start = list(a = 1, b = 1,c=0.01))
+  summary(asymp_model)
+  
+  # fit an asymptotic exponential function
+  exp_model <- nls(imports ~ a * (1 - exp(-alpha * genomes)), start = list(a = 1, alpha = 0.01), data = dat)
+  
+  
+  start_grid <- expand.grid(a = seq(-1, 0, by = 0.1), b = seq(-3, 0, by = 0.5))
+  
+  
+  start_grid <- expand.grid(a = seq(-3, 3, by = 0.5), b = seq(-3, 3, by = 0.5), c=seq(-3, 3, by = 0.5), d=seq(-3, 3, by = 0.5))
+  
+  
+  asymptotic_model = nls2(imports~ a + b*genomes^d/(c+genomes^d), start= start_grid, data=dat)
+  decay_model <- nls2(imports ~ ((a / (b+1))*genomes^(b+1))+1-(a/(b+1)), start = list(a = -3/4, b = -2), data = dat)
+  
+  decay_model <- nls2(imports ~ ((a / (b+1))*genomes^(b+1))+1-(a/(b+1)), start = start_grid, data = dat)
+  
+  
+  summary(exp_model)
+  lrtest(model_import, asymp_model, exp_model)
+  lrtest(asymp_model, exp_model)
+  ?lrtest
+  # plot the data
+  plot(genomes, imports, main = "Import estimate as we add more and more genomes")
+  lines(genomes, predict(model_import), col = "red", lwd = 2)
+  lines(genomes, predict(asymp_model), col = "blue", lwd = 2)
+  lines(genomes, predict(exp_model), col = "green", lwd = 2)
+  lines(genomes, predict(asymptotic_model), col = "purple", lwd = 2)
+
+  
+  plot(dat$genomes, dat$imports, col = "red")
+  lines(dat$genomes, pred, col = "blue") # model predictions
+  lines(dat$genomes, pred[, "fit"], col = "blue") # model predictions
+  lines(dat$genomes, pred[, "lwr"], col = rgb(0, 0, 1, alpha = 0.5)) # lower bound of confidence interval
+  lines(dat$genomes, pred[, "upr"], col = rgb(0, 0, 1, alpha = 0.5)) # upper bound of confidence interval
+  #Access the best fit parameters
+  a <- coef(model_import)[1]
+  b <- coef(model_import)[2]
+  r <- coef(model_import)[3]
+  #Calculate the limit as x approaches infinity
+  limit <- a + b * exp(r * 20000)
+}
+
+
+
+::: {.cell hash='07_simulation_results_cache/html/unnamed-chunk-16_ce1f130159315c5b6d483110d7dcd5d5'}
+::: {.cell-output-display}
+![](07_simulation_results_files/figure-html/unnamed-chunk-16-1.png){width=1920}
+:::
+:::
+
+
+## Simulate geography
+
+We set up a transition rate matrix where the instaneous rate of moving to an different location is 1/10
+
+|                          | **Transition Rate Matrix** |       |
+|--------------------------|----------------------------|-------|
+|                          | Location of interest       | Other |
+| **Location of interest** | 0.9                        | 0.1   |
+| **Other**                | 0.1                        | 0.9   |
+
+This means that we expect the amount of local transmission to be 90% and 10% to be importation.
+
+
+::: {.cell hash='07_simulation_results_cache/html/unnamed-chunk-17_bef3ae8502585ad5ebbf0d1179133e22'}
+
+```
+
+#> make.simmap is sampling character histories conditioned on
+#> the transition matrix
+#> 
+#> Q =
+#>            Norway        RoW
+#> Norway -0.1635346  0.1635346
+#> RoW     0.1635346 -0.1635346
+#> (estimated using likelihood);
+#> and (mean) root node prior probabilities
+#> pi =
+#> Norway    RoW 
+#>    0.5    0.5
+#> no colors provided. using the following legend:
+#>    Norway       RoW 
+#>   "black" "#DF536B"
+```
+
+::: {.cell-output-display}
+![](07_simulation_results_files/figure-html/unnamed-chunk-17-1.png){width=1920}
+:::
+
+::: {.cell-output-display}
+![](07_simulation_results_files/figure-html/unnamed-chunk-17-2.png){width=1920}
+:::
+:::
+
+
+## Calculate the true number of transmission lineages, imports, exports and local transmission
+
+
+::: {.cell hash='07_simulation_results_cache/html/unnamed-chunk-18_7aeac5c23b20b38ade0b458bc005c122'}
+
+:::
+
+
+## Downsample the tree
+
+
+::: {.cell hash='07_simulation_results_cache/html/unnamed-chunk-19_e0add6ea8e5acaf4de8ca9c1f916322d'}
+
+:::
+
+
+## Ideas
+
+-   High sampling density means high probability of capturing closely related lineages. Should sample from the covariance matrix.
+-   Downsampling the true phylogeny
+
+## GPTprompts
+
+I have a time dated phylogeny.\
+I need to simulate locations on the phylogeny in R.\
+I want the rate of staying in the same location to be 90% and the rate of moving to a different location to be 10%.\
+Can you help me with the R code to do this?
+
+...
+
+I need the format to match the output from ace, so that I have the probabilitiy of each state on each node. Can you process the result to achieve that? -->
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

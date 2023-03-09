@@ -66,7 +66,7 @@ eur_tips = names(locations_NOR[which(locations_EUR=="Europe")])
 
 
 
-#Replicate transmission lineage (TL) counts.
+# Replicate transmission lineage (TL) counts.
 # This has been run
 # replicates_NOR = pbreplicate(
 #   100,
